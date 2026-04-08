@@ -35,7 +35,7 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center
-        bg-black/70 backdrop-blur-sm"
+        bg-black/70 backdrop-blur-sm p-8"
       onMouseDown={e => { if (e.target === overlayRef.current) onClose(); }}
     >
       <div className="relative bg-[var(--ink2)] border border-[var(--line2)] rounded-2xl

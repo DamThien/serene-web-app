@@ -25,9 +25,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
   }, [track.soundId, track.muted, toggleMute, engine]);
 
   const handleSolo = useCallback(() => {
-    
     toggleSolo(track.soundId);
-    // audio routing for solo: handled in MixerPlayer via effect
   }, [track.soundId, track.solo, toggleSolo]);
 
   const handleRemove = useCallback(() => {
@@ -38,33 +36,33 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
   return (
     <div
       className={`
-        bg-[var(--ink3)] border border-[var(--line)] rounded-xl p-3 anim-slide
+        track-card bg-[var(--ink3)] border border-[var(--line)] anim-slide
         transition-all duration-150
-        ${track.solo ? 'border-[var(--gold)]' : ''}
-        ${dimmed ? 'opacity-40' : ''}
+        ${track.solo  ? 'border-[var(--gold)]' : ''}
+        ${dimmed      ? 'opacity-40' : ''}
         ${track.muted ? 'opacity-50' : ''}
       `}
     >
       {/* Header row */}
-      <div className="flex items-center gap-2.5 mb-2.5">
-        <div className="w-9 h-9 rounded-lg bg-[var(--ink4)] bg-white flex items-center justify-center text-base flex-shrink-0">
-        <img
-          src={import.meta.env.BASE_URL + `sound_icons/${track.icon}.svg`}
-          alt={track.icon}
-          className="w-6 h-6"
-        />
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+          <img
+            src={import.meta.env.BASE_URL + `sound_icons/${track.icon}.svg`}
+            alt={track.icon}
+            className="w-7 h-7"
+          />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-medium text-[var(--bright)] truncate">{track.title}</div>
-          <div className="text-[10px] text-[var(--mid)] mt-0.5">{track.cat}</div>
+          <div className="text-sm font-medium text-[var(--bright)] truncate">{track.title}</div>
+          <div className="text-xs text-[var(--mid)] mt-0.5">{track.cat}</div>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {/* Mute */}
           <button
             onClick={handleMute}
             title="Mute"
             className={`
-              w-7 h-7 rounded-md border text-[11px] font-semibold flex items-center justify-center
+              w-9 h-9 rounded-lg border text-xs font-semibold flex items-center justify-center
               transition-all duration-150
               ${track.muted
                 ? 'bg-[var(--blush)] border-[var(--blush)] text-white'
@@ -79,7 +77,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
             onClick={handleSolo}
             title="Solo"
             className={`
-              w-7 h-7 rounded-md border text-[11px] font-semibold flex items-center justify-center
+              w-9 h-9 rounded-lg border text-xs font-semibold flex items-center justify-center
               transition-all duration-150
               ${track.solo
                 ? 'bg-[var(--gold)] border-[var(--gold)] text-[#1a1400]'
@@ -93,20 +91,20 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
           <button
             onClick={handleRemove}
             title="Remove"
-            className="w-7 h-7 rounded-md border border-[var(--line)] text-[var(--mid)]
+            className="w-9 h-9 rounded-lg border border-[var(--line)] text-[var(--mid)]
               flex items-center justify-center transition-all duration-150
               hover:border-[rgba(196,126,142,0.4)] hover:text-[var(--blush)]"
           >
-            <X size={11} />
+            <X size={13} />
           </button>
         </div>
       </div>
 
       {/* Volume row */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {track.muted
-          ? <VolumeX size={12} className="text-[var(--mid)] flex-shrink-0" />
-          : <Volume2 size={12} className="text-[var(--mid)] flex-shrink-0" />
+          ? <VolumeX size={14} className="text-[var(--mid)] flex-shrink-0" />
+          : <Volume2 size={14} className="text-[var(--mid)] flex-shrink-0" />
         }
         <input
           type="range"
@@ -114,11 +112,9 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
           min={0} max={1} step={0.01}
           value={track.volume}
           onChange={handleVolume}
-          style={{
-            background: `linear-gradient(to right, var(--sage) ${pct}%, var(--ink4) ${pct}%)`,
-          }}
+          style={{ background: `linear-gradient(to right, var(--sage) ${pct}%, var(--ink4) ${pct}%)` }}
         />
-        <span className="text-[11px] text-[var(--mid)] min-w-[28px] text-right tabular-nums">
+        <span className="text-xs text-[var(--mid)] min-w-[34px] text-right tabular-nums">
           {pct}%
         </span>
       </div>

@@ -31,7 +31,7 @@ export const SoundCard: React.FC<Props> = ({ sound }) => {
     <div
       onClick={handleAdd}
       className={`
-        group flex items-center gap-2.5 px-2 py-1.5 rounded-md cursor-pointer
+        sound-card group flex items-center gap-3 cursor-pointer
         border transition-all duration-150 select-none
         ${inMix
           ? 'bg-[var(--sage3)] border-[rgba(126,184,160,0.2)]'
@@ -39,7 +39,7 @@ export const SoundCard: React.FC<Props> = ({ sound }) => {
         }
       `}
     >
-      <div className="w-8 h-8 rounded-lg bg-[var(--ink4)] bg-white flex items-center justify-center text-sm flex-shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
         <img
           src={import.meta.env.BASE_URL + `sound_icons/${sound.icon}.svg`}
           alt={sound.icon}
@@ -47,12 +47,12 @@ export const SoundCard: React.FC<Props> = ({ sound }) => {
         />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-[var(--bright)] truncate">{sound.title}</div>
-        <div className="text-[10px] text-[var(--mid)] mt-0.5">{sound.categoryname}</div>
+        <div className="text-sm font-medium text-[var(--bright)] truncate">{sound.title}</div>
+        <div className="text-xs text-[var(--mid)] mt-0.5">{sound.categoryname}</div>
       </div>
       <button
         className={`
-          w-6 h-6 rounded-full border flex items-center justify-center flex-shrink-0
+          w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0
           transition-all duration-150
           ${inMix
             ? 'bg-[var(--sage2)] border-[var(--sage2)]'
@@ -63,8 +63,8 @@ export const SoundCard: React.FC<Props> = ({ sound }) => {
         title={inMix ? 'Added' : 'Add to mix'}
       >
         {inMix
-          ? <Check size={10} className="text-white" />
-          : <Plus size={10} className="text-[var(--mid)] group-hover:text-white" />
+          ? <Check size={11} className="text-white" />
+          : <Plus  size={11} className="text-[var(--mid)] group-hover:text-white" />
         }
       </button>
     </div>

@@ -101,7 +101,7 @@ export async function fetchSounds(params?: {
       category: params?.category !== 'All' ? params?.category : undefined,
       isFree: params?.isFree,
       search: params?.search,
-      limit: 200,
+      limit: 205,
     });
 
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/sound?${qs}`);

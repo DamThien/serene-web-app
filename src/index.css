@@ -40,36 +40,185 @@
   --font-serif: 'Instrument Serif', Georgia, serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box;}
 html, body, #root {
   height: 100%;
-  overflow: hidden;
   background: var(--ink);
   color: var(--soft);
   font-family: 'Geist', system-ui, sans-serif;
-  font-size: 13px;
+  /* ── Scale up: 150% base font size (was 13px) ── */
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
 }
 
-::-webkit-scrollbar { width: 3px; height: 3px; }
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--ink4); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--ink4); border-radius: 4px; }
 
+/* ── Range inputs ──────────────────────────────────────── */
 input[type=range] { -webkit-appearance: none; background: transparent; cursor: pointer; }
-input[type=range]::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; }
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 14px; height: 14px;
-  border-radius: 50%; background: var(--sage); margin-top: -5.5px;
+  -webkit-appearance: none; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--sage); margin-top: -7px;
   transition: transform 0.1s;
 }
 input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.25); }
 
-@keyframes slideInLeft { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
-@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-@keyframes pulseRing { 0%,100% { box-shadow:0 0 0 0 rgba(126,184,160,.35); } 50% { box-shadow:0 0 0 6px rgba(126,184,160,0); } }
-@keyframes waveAnim { 0% { transform:scaleY(0.15); } 100% { transform:scaleY(1); } }
-@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+/* ── Animations ────────────────────────────────────────── */
+@keyframes slideInLeft { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
+@keyframes fadeUp      { from { opacity:0; transform:translateY(10px);  } to { opacity:1; transform:translateY(0); } }
+@keyframes pulseRing   { 0%,100% { box-shadow:0 0 0 0 rgba(126,184,160,.35); } 50% { box-shadow:0 0 0 8px rgba(126,184,160,0); } }
+@keyframes waveAnim    { 0% { transform:scaleY(0.15); } 100% { transform:scaleY(1); } }
+@keyframes toastIn     { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 
-.anim-slide   { animation: slideInLeft 0.2s ease both; }
-.anim-fade    { animation: fadeUp 0.25s ease both; }
-.pulse-ring   { animation: pulseRing 1.4s ease-in-out infinite; }
+.anim-slide { animation: slideInLeft 0.2s ease both; }
+.anim-fade  { animation: fadeUp 0.25s ease both; }
+.pulse-ring { animation: pulseRing 1.4s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════
+   PLAYER BAR — scaled & responsive
+   ═══════════════════════════════════════════════════════════ */
+.player-bar {
+  height: 96px;   /* was 84px → ~14% bigger; combined with font scale = ~150% */
+}
+.player-icon {
+  width:  52px;
+  height: 52px;
+}
+.play-btn {
+  width:  56px;
+  height: 56px;
+}
+.stop-btn {
+  width:  38px;
+  height: 38px;
+}
+
+/* Mobile: compact player */
+@media (max-width: 640px) {
+  .player-bar { height: 80px; padding: 0 12px; gap: 10px; }
+  .play-btn   { width: 48px; height: 48px; }
+  .stop-btn   { width: 34px; height: 34px; }
+  .player-icon { width: 42px; height: 42px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOPBAR — responsive
+   ═══════════════════════════════════════════════════════════ */
+.topbar {
+  height: 56px;  /* was 48px */
+  padding: 0 20px;
+}
+
+@media (max-width: 640px) {
+  .topbar { height: 52px; padding: 0 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR — responsive: drawer on mobile
+   ═══════════════════════════════════════════════════════════ */
+.sidebar-panel {
+  width: 300px;      /* was 280px */
+  flex-shrink: 0;
+  transition: transform 0.28s cubic-bezier(.4,0,.2,1), box-shadow 0.28s;
+}
+
+@media (max-width: 768px) {
+  /* On mobile, sidebar becomes a fixed overlay drawer */
+  .sidebar-panel {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 50;
+    width: 85vw;
+    max-width: 320px;
+    transform: translateX(-100%);
+    box-shadow: none;
+    background: var(--ink2);
+  }
+  .sidebar-panel.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,.7);
+  }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 49;
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TRACK CONTROL — more breathing room
+   ═══════════════════════════════════════════════════════════ */
+.track-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOUND CARD — larger tap targets
+   ═══════════════════════════════════════════════════════════ */
+.sound-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEED GRID — responsive columns
+   ═══════════════════════════════════════════════════════════ */
+.feed-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+@media (max-width: 640px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STUDIO LAYOUT — stack on mobile
+   ═══════════════════════════════════════════════════════════ */
+.studio-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .studio-layout {
+    flex-direction: column;
+  }
+}
+
+/* Mobile sidebar toggle button */
+.sidebar-toggle {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line2);
+    color: var(--mid);
+    font-size: 12px;
+    transition: all 0.15s;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .sidebar-toggle:hover {
+    background: var(--ink3);
+    color: var(--soft);
+  }
+}
