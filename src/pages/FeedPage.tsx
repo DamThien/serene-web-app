@@ -81,7 +81,7 @@ export const FeedPage: React.FC = () => {
 
     const newTracks = mix.tracks.map(td => {
       // Match sound by soundId (MongoDB _id string from API)
-      const s = sounds.find(x => String(x.id) === String(td.soundId));
+      const s = sounds.find(x => String(x.id) === String(td.soundId._id));
 
       // Use the sound's already-resolved local audioUrl (set by mapSound in api.ts)
       // Fallback: if sound not in cache, try DEMO legacy format "s4" → sound4.mp3
@@ -90,17 +90,17 @@ export const FeedPage: React.FC = () => {
         url = s.audioUrl; // already "/mylodies_all_sound/sound26.mp3"
       } else {
         // Legacy DEMO_MIXES use soundId like "s4" — strip "s" prefix
-        const num = String(td.soundId).replace(/^s/, '');
+        const num = String(td.soundId.audioUrl).replace(/^s/, '');
         url = `/mylodies_all_sound/sound${num}.mp3`;
       }
 
       return {
-        soundId: String(td.soundId),
+        soundId: String(td.soundId._id),
         volume: td.volume,
         loop: true,
         muted: false,
         solo: false,
-        title: s?.title ?? `Sound ${td.soundId}`,
+        title: s?.title ?? td.soundId.title,
         cat: s?.categoryname ?? 'Unknown',
         icon: s?.icon ?? '🎵',
         url,
@@ -113,7 +113,7 @@ export const FeedPage: React.FC = () => {
     setPlaying(false);
 
     // Start playback
-    newTracks.forEach(t => engine.play(t.soundId, t.url, t.volume));
+    newTracks.forEach(t => engine.play(t.soundId, t.url, t.volume));    
     setPlaying(true);
 
     try { await logMixPlay(mix.id); } catch {

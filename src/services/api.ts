@@ -132,7 +132,7 @@ function mapMix(item: any): Mix {
     tags: item.tags ?? [],
     user: item.user ?? item.createdBy ?? 'anonymous',
     createdAt: item.createdAt,
-    tracks: (item.tracks ?? []).map((t: any) => ({
+    tracks: (item.sounds ?? []).map((t: any) => ({
       soundId: t.soundId ?? t._id ?? t.id ?? '',
       volume: t.volume ?? 0.7,
     })),
