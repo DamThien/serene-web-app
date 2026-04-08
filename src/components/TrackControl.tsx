@@ -49,7 +49,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
       <div className="flex items-center gap-2.5 mb-2.5">
         <div className="w-9 h-9 rounded-lg bg-[var(--ink4)] bg-white flex items-center justify-center text-base flex-shrink-0">
         <img
-          src={`/sound_icons/${track.icon}.svg`}
+          src={import.meta.env.BASE_URL + `sound_icons/${track.icon}.svg`}
           alt={track.icon}
           className="w-6 h-6"
         />

@@ -3,7 +3,7 @@ import type { Mix, Sound } from '../types';
 // const import.meta.env.VITE_API_BASE = 'https://serene-api.shapeecloud.com/v1';
 
 /** Local audio base — always uses public/mylodies_all_sound to avoid CORS */
-const LOCAL_AUDIO_BASE = '/mylodies_all_sound';
+const LOCAL_AUDIO_BASE = import.meta.env.BASE_URL + 'mylodies_all_sound';
 
 /**
  * Extract filename from API audioUrl and map to local path.

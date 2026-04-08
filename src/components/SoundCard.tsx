@@ -41,7 +41,7 @@ export const SoundCard: React.FC<Props> = ({ sound }) => {
     >
       <div className="w-8 h-8 rounded-lg bg-[var(--ink4)] bg-white flex items-center justify-center text-sm flex-shrink-0">
         <img
-          src={`/sound_icons/${sound.icon}.svg`}
+          src={import.meta.env.BASE_URL + `sound_icons/${sound.icon}.svg`}
           alt={sound.icon}
           className="w-6 h-6"
         />

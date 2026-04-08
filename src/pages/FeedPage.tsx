@@ -177,7 +177,7 @@ export const FeedPage: React.FC = () => {
           rounded-xl px-4 py-3 mb-5 anim-fade">
           <span className="text-xl bg-white rounded-l bg-white flex items-center justify-center text-xl flex-shrink-0">
             <img
-              src={`/sound_icons/${playingMix.icon}.svg`}
+              src={import.meta.env.BASE_URL + `sound_icons/${playingMix.icon}.svg`}
               alt={playingMix.icon}
               className="w-6 h-6"
             />
@@ -253,7 +253,7 @@ const MixCard: React.FC<CardProps> = ({ mix, playing, onPlay, style }) => {
       <div className="flex items-start gap-2.5 mb-3">
         <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0">
           <img
-            src={`/sound_icons/${mix.icon}.svg`}
+            src={import.meta.env.BASE_URL + `sound_icons/${mix.icon}.svg`}
             alt={mix.icon}
             className="w-6 h-6"
           />

@@ -140,7 +140,7 @@ export const MixerPlayer: React.FC = () => {
       <div className="flex items-center gap-2.5 flex-1 min-w-0">
         <div className="w-10 h-10 rounded-lg bg-[var(--ink4)] bg-white flex items-center justify-center text-lg flex-shrink-0">
         <img
-          src={`/sound_icons/${nowIcon}.svg`}
+          src={import.meta.env.BASE_URL + `sound_icons/${nowIcon}.svg`}
           alt={nowIcon}
           className="w-6 h-6"
         />
