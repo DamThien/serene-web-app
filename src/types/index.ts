@@ -18,7 +18,7 @@ export interface Sound {
 }
 
 export interface Track {
-  soundId: string;
+  soundId: any;
   volume: number;   // 0–1
   loop: boolean;
   muted: boolean;
@@ -31,7 +31,7 @@ export interface Track {
 }
 
 export interface Mix {
-  id: string;
+  _id: string;
   name: string;
   description?: string;
   tracks: Pick<Track, 'soundId' | 'volume'>[];

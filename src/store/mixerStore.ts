@@ -118,7 +118,7 @@ export const useMixerStore = create<MixerState>((set, get) => ({
   // ── Saved mixes ─────────────────────────────────────────
   savedMixes: [],
   addSavedMix: (m) => set(s => ({ savedMixes: [m, ...s.savedMixes] })),
-  deleteSavedMix: (id) => set(s => ({ savedMixes: s.savedMixes.filter(m => m.id !== id) })),
+  deleteSavedMix: (id) => set(s => ({ savedMixes: s.savedMixes.filter(m => m._id !== id) })),
 
   // ── Auth ────────────────────────────────────────────────
   user: null,

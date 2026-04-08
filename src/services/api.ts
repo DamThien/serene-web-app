@@ -123,7 +123,7 @@ export async function fetchSounds(params?: {
 /** Map raw API mix item → Mix type */
 function mapMix(item: any): Mix {
   return {
-    id: item._id ?? item.id ?? String(Math.random()),
+    _id: item._id ?? item.id ?? String(Math.random()),
     name: item.name ?? 'Untitled',
     description: item.description ?? '',
     icon: item.icon ?? '🎵',
@@ -183,7 +183,7 @@ export async function createMix(payload: CreateMixPayload): Promise<Mix> {
     // fallback (dev mode)
     return {
       ...payload,
-      id: 'u_' + Date.now(),
+      _id: 'u_' + Date.now(),
       icon: '🎵',
       plays: 0,
       tags: [],

@@ -3,7 +3,10 @@ import { Search, Play, Pause } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import { useAudioEngineContext } from '../components/AudioEngineProvider';
 import { fetchSounds, fetchPublicMixes } from '../services/api';
-import { DEMO_MIXES, FEED_FILTERS } from '../data/feed';
+import { 
+  // DEMO_MIXES,
+  FEED_FILTERS 
+} from '../data/feed';
 import { logMixPlay } from '../services/api';
 import { toast } from '../components/Toast';
 import type { Mix, Sound } from '../types';
@@ -25,10 +28,10 @@ export const FeedPage: React.FC = () => {
 
     // Fetch default mixes from API
     fetchPublicMixes().then(mixes => {
-      setApiMixes(mixes.length > 0 ? mixes : DEMO_MIXES);
+      setApiMixes(mixes.length > 0 ? mixes : []);
       setMixesLoading(false);
     }).catch(() => {
-      setApiMixes(DEMO_MIXES);
+      // setApiMixes(DEMO_MIXES);
       setMixesLoading(false);
     });
   }, []);
@@ -62,12 +65,12 @@ export const FeedPage: React.FC = () => {
     return list;
   }, [query, filter, savedMixes, apiMixes]);
 
-  const playingMix = allMixes.find(m => m.id === feedPlayingId);
+  const playingMix = allMixes.find(m => m._id === feedPlayingId);
   const isThisPlaying = (id: string) => feedPlayingId === id && isPlaying;
 
   const handlePlay = useCallback(async (mix: Mix) => {
     // Same mix — toggle play/pause
-    if (feedPlayingId === mix.id) {
+    if (feedPlayingId === mix._id) {
       if (isPlaying) { engine.pauseAll(); setPlaying(false); }
       else { engine.resumeAll(); setPlaying(true); }
       return;
@@ -75,7 +78,7 @@ export const FeedPage: React.FC = () => {
 
     // New mix — stop old, load new tracks
     engine.stopAll();
-    setFeedPlayingId(mix.id);
+    setFeedPlayingId(mix._id);
 
     const sounds = soundsCacheRef.current;
 
@@ -85,22 +88,18 @@ export const FeedPage: React.FC = () => {
 
       // Use the sound's already-resolved local audioUrl (set by mapSound in api.ts)
       // Fallback: if sound not in cache, try DEMO legacy format "s4" → sound4.mp3
-      let url: string;
+      let url: string = ''; // Assign a default value to avoid uninitialized usage
       if (s?.audioUrl) {
         url = s.audioUrl; // already "/mylodies_all_sound/sound26.mp3"
-      } else {
-        // Legacy DEMO_MIXES use soundId like "s4" — strip "s" prefix
-        const num = String(td.soundId.audioUrl).replace(/^s/, '');
-        url = `/mylodies_all_sound/sound${num}.mp3`;
       }
 
       return {
-        soundId: String(td.soundId._id),
+        soundId: String(td.soundId), // handle both API ObjectId and legacy string
         volume: td.volume,
         loop: true,
         muted: false,
         solo: false,
-        title: s?.title ?? td.soundId.title,
+        title: s?.title ?? `Sound ${td.soundId}`,
         cat: s?.categoryname ?? 'Unknown',
         icon: s?.icon ?? '🎵',
         url,
@@ -116,7 +115,7 @@ export const FeedPage: React.FC = () => {
     newTracks.forEach(t => engine.play(t.soundId, t.url, t.volume));    
     setPlaying(true);
 
-    try { await logMixPlay(mix.id); } catch {
+    try { await logMixPlay(mix._id); } catch {
       // non-critical
     }
     toast(`Now playing: ${mix.name}`);
@@ -212,9 +211,9 @@ export const FeedPage: React.FC = () => {
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px,1fr))' }}>
           {visible.map((m, i) => (
             <MixCard
-              key={m.id}
+              key={m._id}
               mix={m}
-              playing={isThisPlaying(m.id)}
+              playing={isThisPlaying(m._id)}
               onPlay={() => handlePlay(m)}
               style={{ animationDelay: `${i * 0.04}s` }}
             />

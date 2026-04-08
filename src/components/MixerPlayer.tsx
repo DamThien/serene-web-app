@@ -119,7 +119,7 @@ export const MixerPlayer: React.FC = () => {
   }, []);
 
   const TIMER_OPTS = [15, 30, 45, 60, 90];
-  const nowIcon = tracks[0]?.icon ?? '🎵';
+  const nowIcon = tracks[0]?.icon ? tracks[0]?.icon: "melody";
   const nowName = mixName || (tracks.length ? 'Untitled Mix' : 'No mix loaded');
   const nowSub  = tracks.length
     ? tracks.map(t => t.title).join(' · ')
