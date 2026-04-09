@@ -33,6 +33,8 @@ export const MixerPlayer: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [customTimerMins, setCustomTimerMins] = useState('5');
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerBtnRef = useRef<HTMLButtonElement>(null);
   const timerDDRef = useRef<HTMLDivElement>(null);
@@ -53,13 +55,29 @@ export const MixerPlayer: React.FC = () => {
   }, [engine, setPlaying]);
 
   useEffect(() => {
+    if (!sleepMins) {
+      setRemainingSeconds(0);
+      return;
+    }
+
+    const remaining = Math.max(0, sleepMins * 60 - elapsedRef.current);
+    setRemainingSeconds(remaining);
+  }, [sleepMins]);
+
+  useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
         const next = elapsedRef.current + 1;
         elapsedRef.current = next;
+        const nextRemaining = Math.max(0, sleepMins * 60 - next);
+
+        if (sleepMins > 0) {
+          setRemainingSeconds(nextRemaining);
+        }
 
         if (sleepMins > 0 && next >= sleepMins * 60) {
           handleStop();
+          setRemainingSeconds(0);
           toast('Sleep timer ended');
           return;
         }
@@ -86,6 +104,11 @@ export const MixerPlayer: React.FC = () => {
   }, [handlePause, handleStop, isPlaying, premiumUnlocked, sleepMins, tracks]);
 
   const fmt = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  const fmtCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = String(seconds % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
 
   useEffect(() => {
     const hasSolo = tracks.some((track) => track.solo);
@@ -240,6 +263,13 @@ export const MixerPlayer: React.FC = () => {
   const masterPct = Math.round(masterVolume * 100);
   const visibilityLabel = isPublic ? 'Public' : 'Private';
   const saveLabel = activeMixId && activeMixOwned ? 'Update Mix' : 'Save Mix';
+  const handleSetSleepTimer = (minutes: number) => {
+    const normalized = Math.max(1, Math.floor(minutes));
+    setSleepMins(normalized);
+    setRemainingSeconds(Math.max(0, normalized * 60 - elapsedRef.current));
+    setTimerOpen(false);
+    toast(`Sleep timer: ${normalized} min`);
+  };
 
   return (
     <>
@@ -305,28 +335,60 @@ export const MixerPlayer: React.FC = () => {
               <span className="hidden sm:inline">{sleepMins > 0 ? `${sleepMins}m` : 'Timer'}</span>
             </button>
 
+            {sleepMins > 0 && (
+              <div className="absolute top-full right-0 mt-1 text-[10px] text-[var(--gold)] tabular-nums whitespace-nowrap">
+                Sleep in {fmtCountdown(remainingSeconds)}
+              </div>
+            )}
+
             {timerOpen && (
               <div
                 ref={timerDDRef}
-                className="absolute bottom-full right-0 mb-2 bg-[var(--ink3)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.5)] min-w-[150px] anim-fade z-50"
+                className="absolute bottom-full right-0 mb-2 bg-[var(--ink3)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.5)] min-w-[190px] anim-fade z-50"
               >
                 {timerOptions.map((minutes) => (
                   <button
                     key={minutes}
-                    onClick={() => {
-                      setSleepMins(minutes);
-                      setTimerOpen(false);
-                      toast(`Sleep timer: ${minutes} min`);
-                    }}
+                    onClick={() => handleSetSleepTimer(minutes)}
                     className={`w-full text-left text-sm px-4 py-2.5 rounded-lg transition-colors ${sleepMins === minutes ? 'text-[var(--gold)]' : 'text-[var(--soft)] hover:bg-[var(--ink4)]'}`}
                   >
                     {minutes} minutes
                   </button>
                 ))}
+                <div className="border-t border-[var(--line)] mt-1 pt-2">
+                  <div className="text-[11px] uppercase tracking-[0.14em] text-[var(--mid)] px-2 pb-2">
+                    Custom time
+                  </div>
+                  <div className="flex items-center gap-2 px-2 pb-1">
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={customTimerMins}
+                      onChange={(event) => setCustomTimerMins(event.target.value)}
+                      className="w-full bg-[var(--ink4)] border border-[var(--line)] rounded-lg px-3 py-2 text-sm text-[var(--bright)] outline-none"
+                      placeholder="5"
+                    />
+                    <button
+                      onClick={() => {
+                        const value = Number(customTimerMins);
+                        if (!Number.isFinite(value) || value <= 0) {
+                          toast('Enter a valid sleep time');
+                          return;
+                        }
+                        handleSetSleepTimer(value);
+                      }}
+                      className="px-3 py-2 rounded-lg bg-[var(--sage2)] text-white text-sm"
+                    >
+                      Set
+                    </button>
+                  </div>
+                </div>
                 {sleepMins > 0 && (
                   <button
                     onClick={() => {
                       setSleepMins(0);
+                      setRemainingSeconds(0);
                       setTimerOpen(false);
                       toast('Timer cancelled');
                     }}

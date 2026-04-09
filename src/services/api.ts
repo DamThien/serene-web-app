@@ -251,11 +251,24 @@ function mapMix(item: any): Mix {
     _id: String(item?._id ?? item?.id ?? ''),
     name: item?.name ?? 'Untitled',
     description: item?.description ?? '',
+    sourceMixId: item?.sourceMixId ? String(item.sourceMixId) : undefined,
     icon: item?.icon ?? rawTracks?.[0]?.soundId?.icon ?? 'melody',
     isPublic: Boolean(item?.isPublic),
+    isPublicUserMix: Boolean(item?.isPublicUserMix),
     plays: item?.playCount ?? item?.plays ?? 0,
     tags: Array.isArray(item?.tags) ? item.tags : [],
-    user: item?.user?.name ?? item?.createdBy?.name ?? item?.user ?? 'anonymous',
+    user:
+      item?.user?.name
+      ?? item?.sourceUserId?.name
+      ?? item?.sourceUserName
+      ?? item?.createdBy?.name
+      ?? item?.user
+      ?? 'anonymous',
+    username:
+      item?.user?.username
+      ?? item?.sourceUserId?.username
+      ?? item?.createdBy?.username
+      ?? undefined,
     createdAt: item?.createdAt,
     tracks: rawTracks.map((track: any) => ({
       soundId: String(track?.soundId?._id ?? track?.soundId?.id ?? track?.soundId ?? ''),

@@ -16,6 +16,27 @@ const resolveSoundId = (value: unknown) => {
   return String(value ?? '');
 };
 
+const dedupeMixes = (ownMixes: Mix[], mixes: Mix[]) => {
+  const ownIds = new Set(ownMixes.map((mix) => mix._id));
+  const seenKeys = new Set<string>();
+
+  return mixes.filter((mix) => {
+    const sourceId = mix.sourceMixId || '';
+    const dedupeKey = sourceId || mix._id;
+
+    if (sourceId && ownIds.has(sourceId)) {
+      return false;
+    }
+
+    if (!dedupeKey || seenKeys.has(dedupeKey)) {
+      return false;
+    }
+
+    seenKeys.add(dedupeKey);
+    return true;
+  });
+};
+
 export const FeedPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('All');
@@ -58,7 +79,7 @@ export const FeedPage: React.FC = () => {
 
   const ownMixes = savedMixes.map(m => ({ ...m, isOwn: true }));
   const publicOwn = ownMixes.filter(m => m.isPublic);
-  const communityMixes: Mix[] = [...publicOwn, ...apiMixes];
+  const communityMixes: Mix[] = dedupeMixes(ownMixes, [...publicOwn, ...apiMixes]);
   const sourceMixes = activeTab === 'community' ? communityMixes : ownMixes;
 
   const visible = useMemo(() => {

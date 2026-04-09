@@ -61,9 +61,12 @@ export interface Mix {
   name: string;
   description?: string;
   tracks: Pick<Track, 'soundId' | 'volume'>[];
+  sourceMixId?: string;
   isPublic: boolean;
+  isPublicUserMix?: boolean;
   icon: string;
   user?: string;
+  username?: string;
   plays?: number;
   tags?: string[];
   createdAt?: string;
