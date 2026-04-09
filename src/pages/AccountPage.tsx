@@ -123,14 +123,9 @@ export const AccountPage: React.FC = () => {
                       @{user.username}
                     </span>
                   )}
-                  {user?.type && (
+                  {user?.type == "guest" && (
                     <span className="px-3 py-1.5 rounded-full border border-[var(--line)] text-xs text-[var(--soft)]">
                       {user.type}
-                    </span>
-                  )}
-                  {user?.source && (
-                    <span className="px-3 py-1.5 rounded-full border border-[var(--line)] text-xs text-[var(--soft)]">
-                      {user.source}
                     </span>
                   )}
                 </div>

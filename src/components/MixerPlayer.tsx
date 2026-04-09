@@ -9,6 +9,11 @@ export const MixerPlayer: React.FC = () => {
   const tracks = useMixerStore((state) => state.tracks);
   const isPlaying = useMixerStore((state) => state.isPlaying);
   const setPlaying = useMixerStore((state) => state.setPlaying);
+  const playbackStartedAt = useMixerStore((state) => state.playbackStartedAt);
+  const playbackAccumulatedMs = useMixerStore((state) => state.playbackAccumulatedMs);
+  const startPlaybackClock = useMixerStore((state) => state.startPlaybackClock);
+  const pausePlaybackClock = useMixerStore((state) => state.pausePlaybackClock);
+  const resetPlaybackClock = useMixerStore((state) => state.resetPlaybackClock);
   const mixName = useMixerStore((state) => state.mixName);
   const mixDesc = useMixerStore((state) => state.mixDesc);
   const isPublic = useMixerStore((state) => state.isPublic);
@@ -28,7 +33,7 @@ export const MixerPlayer: React.FC = () => {
   const premiumUnlocked = useMixerStore((state) => state.isPremiumUnlocked());
 
   const engine = useAudioEngineContext();
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(Math.floor(playbackAccumulatedMs / 1000));
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
@@ -38,21 +43,29 @@ export const MixerPlayer: React.FC = () => {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerBtnRef = useRef<HTMLButtonElement>(null);
   const timerDDRef = useRef<HTMLDivElement>(null);
-  const elapsedRef = useRef(0);
+  const elapsedRef = useRef(Math.floor(playbackAccumulatedMs / 1000));
 
   const handlePause = useCallback(() => {
     engine.pauseAll();
+    pausePlaybackClock();
     setPlaying(false);
     engine.setMediaSessionState('paused');
-  }, [engine, setPlaying]);
+  }, [engine, pausePlaybackClock, setPlaying]);
 
   const handleStop = useCallback(() => {
     engine.stopAll();
     setPlaying(false);
+    resetPlaybackClock();
     elapsedRef.current = 0;
     setElapsed(0);
     engine.setMediaSessionState('none');
-  }, [engine, setPlaying]);
+  }, [engine, resetPlaybackClock, setPlaying]);
+
+  useEffect(() => {
+    const baseSeconds = Math.floor(playbackAccumulatedMs / 1000);
+    elapsedRef.current = baseSeconds;
+    setElapsed(baseSeconds);
+  }, [playbackAccumulatedMs]);
 
   useEffect(() => {
     if (!sleepMins) {
@@ -67,7 +80,10 @@ export const MixerPlayer: React.FC = () => {
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
-        const next = elapsedRef.current + 1;
+        const runningMs = playbackStartedAt === null
+          ? playbackAccumulatedMs
+          : playbackAccumulatedMs + Math.max(0, Date.now() - playbackStartedAt);
+        const next = Math.floor(runningMs / 1000);
         elapsedRef.current = next;
         const nextRemaining = Math.max(0, sleepMins * 60 - next);
 
@@ -89,10 +105,7 @@ export const MixerPlayer: React.FC = () => {
           return;
         }
 
-        // Update the visible timer less frequently to reduce React re-renders during playback.
-        if (next <= 3 || next % 5 === 0) {
-          setElapsed(next);
-        }
+        setElapsed(next);
       }, 1000);
     } else if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -101,7 +114,7 @@ export const MixerPlayer: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [handlePause, handleStop, isPlaying, premiumUnlocked, sleepMins, tracks]);
+  }, [handlePause, handleStop, isPlaying, playbackAccumulatedMs, playbackStartedAt, premiumUnlocked, sleepMins, tracks]);
 
   const fmt = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
   const fmtCountdown = (seconds: number) => {
@@ -133,6 +146,7 @@ export const MixerPlayer: React.FC = () => {
       }
     });
 
+    startPlaybackClock();
     setPlaying(true);
 
     engine.syncMediaSession(
@@ -146,7 +160,7 @@ export const MixerPlayer: React.FC = () => {
         onStop: handleStop,
       },
     );
-  }, [engine, handlePause, handleStop, mixName, setPlaying, tracks]);
+  }, [engine, handlePause, handleStop, mixName, setPlaying, startPlaybackClock, tracks]);
 
   const handleTogglePlay = () => (isPlaying ? handlePause() : handlePlay());
 

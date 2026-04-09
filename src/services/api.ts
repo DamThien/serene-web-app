@@ -157,6 +157,10 @@ export function isAuthenticated() {
   return Boolean(getStoredSession().tokens?.accessToken);
 }
 
+export function hasRefreshSession() {
+  return Boolean(getStoredSession().tokens?.refreshToken);
+}
+
 export function clearSession() {
   sessionCache = { user: null, tokens: null };
   localStorage.removeItem(SESSION_KEY);
@@ -344,6 +348,20 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
+export async function restoreSession(): Promise<boolean> {
+  if (!hasRefreshSession()) {
+    return false;
+  }
+
+  const current = getStoredSession();
+  if (current.tokens?.accessToken) {
+    return true;
+  }
+
+  const tokens = await refreshAccessToken();
+  return Boolean(tokens?.accessToken);
+}
+
 async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
@@ -357,7 +375,12 @@ async function apiFetch<T>(
   headers.set('x-device-id', getDeviceId());
 
   if (options.auth) {
-    const token = getStoredSession().tokens?.accessToken;
+    let token = getStoredSession().tokens?.accessToken;
+    if (!token && options.retry !== false) {
+      const tokens = await refreshAccessToken();
+      token = tokens?.accessToken;
+    }
+
     if (!token) {
       throw new Error('Authentication required');
     }

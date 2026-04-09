@@ -22,6 +22,11 @@ export interface MixerState {
 
   isPlaying: boolean;
   setPlaying: (value: boolean) => void;
+  playbackStartedAt: number | null;
+  playbackAccumulatedMs: number;
+  startPlaybackClock: (startedAt?: number) => void;
+  pausePlaybackClock: (pausedAt?: number) => void;
+  resetPlaybackClock: () => void;
 
   mixName: string;
   mixDesc: string;
@@ -116,6 +121,24 @@ export const useMixerStore = create<MixerState>((set, get) => ({
 
   isPlaying: false,
   setPlaying: (value) => set({ isPlaying: value }),
+  playbackStartedAt: null,
+  playbackAccumulatedMs: 0,
+  startPlaybackClock: (startedAt = Date.now()) => set((state) => (
+    state.playbackStartedAt === null
+      ? { playbackStartedAt: startedAt }
+      : state
+  )),
+  pausePlaybackClock: (pausedAt = Date.now()) => set((state) => {
+    if (state.playbackStartedAt === null) {
+      return state;
+    }
+
+    return {
+      playbackStartedAt: null,
+      playbackAccumulatedMs: state.playbackAccumulatedMs + Math.max(0, pausedAt - state.playbackStartedAt),
+    };
+  }),
+  resetPlaybackClock: () => set({ playbackStartedAt: null, playbackAccumulatedMs: 0 }),
 
   mixName: '',
   mixDesc: '',
@@ -157,6 +180,8 @@ export const useMixerStore = create<MixerState>((set, get) => ({
     activeMixOwned: false,
     tracks: [],
     isPlaying: false,
+    playbackStartedAt: null,
+    playbackAccumulatedMs: 0,
     selectedSilentFrequencies: [],
     selectedFrequencyLayer: null,
   }),

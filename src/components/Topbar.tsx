@@ -6,7 +6,14 @@ import { AuthModal } from './AuthModal';
 import { toast } from './Toast';
 
 export const Topbar: React.FC = () => {
-  const { page, setPage, user, subscription, setUser, setSavedMixes, setFavoriteSoundIds, setSubscription } = useMixerStore();
+  const page = useMixerStore((state) => state.page);
+  const setPage = useMixerStore((state) => state.setPage);
+  const user = useMixerStore((state) => state.user);
+  const subscription = useMixerStore((state) => state.subscription);
+  const setUser = useMixerStore((state) => state.setUser);
+  const setSavedMixes = useMixerStore((state) => state.setSavedMixes);
+  const setFavoriteSoundIds = useMixerStore((state) => state.setFavoriteSoundIds);
+  const setSubscription = useMixerStore((state) => state.setSubscription);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [authOpen, setAuthOpen] = useState(false);
 

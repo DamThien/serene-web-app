@@ -7,7 +7,10 @@ import { useAudioEngineContext } from './AudioEngineProvider';
 interface Props { track: Track; hasSolo: boolean; }
 
 export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
-  const { updateVolume, toggleMute, toggleSolo, removeTrack } = useMixerStore();
+  const updateVolume = useMixerStore((state) => state.updateVolume);
+  const toggleMute = useMixerStore((state) => state.toggleMute);
+  const toggleSolo = useMixerStore((state) => state.toggleSolo);
+  const removeTrack = useMixerStore((state) => state.removeTrack);
   const engine = useAudioEngineContext();
 
   const pct = Math.round(track.volume * 100);

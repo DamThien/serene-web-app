@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { AudioEngineProvider } from './components/AudioEngineProvider';
+import { MixerPlayer } from './components/MixerPlayer';
 import { Topbar } from './components/Topbar';
 import { ToastContainer, toast } from './components/Toast';
 import { StudioPage } from './pages/StudioPage';
@@ -13,7 +14,9 @@ import {
   fetchSubscriptionPlans,
   fetchUserMixes,
   getSession,
+  hasRefreshSession,
   isAuthenticated,
+  restoreSession,
 } from './services/api';
 
 const Pages: React.FC = () => {
@@ -61,6 +64,10 @@ const AppBootstrap: React.FC = () => {
         const plans = await fetchSubscriptionPlans().catch(() => []);
         setSubscriptionPlans(plans);
 
+        if (!isAuthenticated() && hasRefreshSession()) {
+          await restoreSession();
+        }
+
         if (!isAuthenticated()) {
           return;
         }
@@ -96,6 +103,7 @@ const App: React.FC = () => (
       <AppBootstrap />
       <Topbar />
       <Pages />
+      <MixerPlayer />
       <ToastContainer />
     </div>
   </AudioEngineProvider>

@@ -46,6 +46,7 @@ export const FeedPage: React.FC = () => {
   const deferredQuery = useDeferredValue(query);
 
   const soundsCacheRef = useRef<Sound[]>([]);
+  const playLogRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     fetchSounds().then(data => {
@@ -65,6 +66,9 @@ export const FeedPage: React.FC = () => {
   const setFeedPlayingId = useMixerStore(state => state.setFeedPlayingId);
   const isPlaying = useMixerStore(state => state.isPlaying);
   const setPlaying = useMixerStore(state => state.setPlaying);
+  const startPlaybackClock = useMixerStore(state => state.startPlaybackClock);
+  const pausePlaybackClock = useMixerStore(state => state.pausePlaybackClock);
+  const resetPlaybackClock = useMixerStore(state => state.resetPlaybackClock);
   const loadTracks = useMixerStore(state => state.loadTracks);
   const setMixName = useMixerStore(state => state.setMixName);
   const setMixDesc = useMixerStore(state => state.setMixDesc);
@@ -110,10 +114,12 @@ export const FeedPage: React.FC = () => {
     if (feedPlayingId === mix._id) {
       if (isPlaying) {
         engine.pauseAll();
+        pausePlaybackClock();
         setPlaying(false);
         engine.setMediaSessionState('paused');
       } else {
         engine.resumeAll();
+        startPlaybackClock();
         setPlaying(true);
         engine.setMediaSessionState('playing');
       }
@@ -121,6 +127,7 @@ export const FeedPage: React.FC = () => {
     }
 
     engine.stopAll();
+    resetPlaybackClock();
     setFeedPlayingId(mix._id);
 
     const sounds = soundsCacheRef.current;
@@ -154,6 +161,7 @@ export const FeedPage: React.FC = () => {
     setPlaying(false);
 
     newTracks.forEach(track => engine.play(track.soundId, track.url, track.volume));
+    startPlaybackClock();
     setPlaying(true);
 
     engine.syncMediaSession(
@@ -161,28 +169,37 @@ export const FeedPage: React.FC = () => {
       {
         onPlay: () => {
           engine.resumeAll();
+          startPlaybackClock();
           setPlaying(true);
         },
         onPause: () => {
           engine.pauseAll();
+          pausePlaybackClock();
           setPlaying(false);
         },
         onStop: () => {
           engine.stopAll();
+          resetPlaybackClock();
           setPlaying(false);
           setFeedPlayingId('');
         },
       },
     );
 
-    try {
-      await logMixPlay(mix._id);
-    } catch {
-      // non-critical
+    const lastLoggedAt = playLogRef.current.get(mix._id) ?? 0;
+    const shouldLogPlay = !mix.isOwn && Date.now() - lastLoggedAt > 30_000;
+
+    if (shouldLogPlay) {
+      try {
+        await logMixPlay(mix._id);
+        playLogRef.current.set(mix._id, Date.now());
+      } catch {
+        // non-critical
+      }
     }
 
     toast(`Now playing: ${mix.name}`);
-  }, [feedPlayingId, isPlaying, engine, setFeedPlayingId, loadTracks, setMixName, setMixDesc, setPublic, setSelectedSilentFrequencies, setSelectedFrequencyLayer, setActiveMixContext, setPlaying]);
+  }, [feedPlayingId, isPlaying, engine, pausePlaybackClock, resetPlaybackClock, setFeedPlayingId, loadTracks, setMixName, setMixDesc, setPublic, setSelectedSilentFrequencies, setSelectedFrequencyLayer, setActiveMixContext, setPlaying, startPlaybackClock]);
 
   const handleOpenInStudio = (mix: Mix) => {
     void handlePlay(mix);

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Crown, Globe, Lock, PanelLeft, Sparkles, Waves } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { TrackControl } from '../components/TrackControl';
-import { MixerPlayer } from '../components/MixerPlayer';
 import { useMixerStore } from '../store/mixerStore';
 
 export const StudioPage: React.FC = () => {
@@ -128,8 +127,6 @@ export const StudioPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <MixerPlayer />
     </div>
   );
 };
