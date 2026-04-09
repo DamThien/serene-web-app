@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Crown, LogOut } from 'lucide-react';
+import { Crown, LogOut, UserRound } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import { logout } from '../services/api';
 import { AuthModal } from './AuthModal';
@@ -47,6 +47,15 @@ export const Topbar: React.FC = () => {
               {item === 'studio' ? 'Studio' : 'Community'}
             </button>
           ))}
+          {user && (
+            <button
+              onClick={() => setPage('account')}
+              className={`text-sm font-medium px-4 py-2 rounded-lg transition-all duration-150 flex items-center gap-2 ${page === 'account' ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+            >
+              <UserRound size={14} />
+              Account
+            </button>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -58,9 +67,21 @@ export const Topbar: React.FC = () => {
               </div>
               <div className="flex items-center gap-2.5">
                 <span className="text-sm text-[var(--mid)] hidden sm:inline">{user.name}</span>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--sage2)] to-[var(--indigo)] flex items-center justify-center text-sm font-semibold text-white cursor-pointer">
-                  {user.avatar}
-                </div>
+                <button
+                  onClick={() => setPage('account')}
+                  className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--sage2)] to-[var(--indigo)] flex items-center justify-center text-sm font-semibold text-white cursor-pointer"
+                  title="Open account"
+                >
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    user.avatar
+                  )}
+                </button>
                 <button
                   onClick={() => void handleLogout()}
                   className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"

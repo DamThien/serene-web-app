@@ -26,11 +26,14 @@ export interface MixerState {
   mixName: string;
   mixDesc: string;
   isPublic: boolean;
+  activeMixId: string | null;
+  activeMixOwned: boolean;
   selectedSilentFrequencies: SilentFrequency[];
   selectedFrequencyLayer: FrequencyLayer | null;
   setMixName: (value: string) => void;
   setMixDesc: (value: string) => void;
   setPublic: (value: boolean) => void;
+  setActiveMixContext: (mixId: string | null, owned: boolean) => void;
   setSelectedSilentFrequencies: (items: SilentFrequency[]) => void;
   toggleSilentFrequency: (item: SilentFrequency) => boolean;
   setSelectedFrequencyLayer: (item: FrequencyLayer | null) => void;
@@ -117,11 +120,14 @@ export const useMixerStore = create<MixerState>((set, get) => ({
   mixName: '',
   mixDesc: '',
   isPublic: false,
+  activeMixId: null,
+  activeMixOwned: false,
   selectedSilentFrequencies: [],
   selectedFrequencyLayer: null,
   setMixName: (value) => set({ mixName: value }),
   setMixDesc: (value) => set({ mixDesc: value }),
   setPublic: (value) => set({ isPublic: value }),
+  setActiveMixContext: (mixId, owned) => set({ activeMixId: mixId, activeMixOwned: owned }),
   setSelectedSilentFrequencies: (items) =>
     set({ selectedSilentFrequencies: items.slice(0, MAX_SILENT_FREQUENCIES) }),
   toggleSilentFrequency: (item) => {
@@ -147,6 +153,8 @@ export const useMixerStore = create<MixerState>((set, get) => ({
     mixName: '',
     mixDesc: '',
     isPublic: false,
+    activeMixId: null,
+    activeMixOwned: false,
     tracks: [],
     isPlaying: false,
     selectedSilentFrequencies: [],

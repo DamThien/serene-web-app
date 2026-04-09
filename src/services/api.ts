@@ -29,8 +29,8 @@ interface ApiResponse<T> {
     pages: number;
   };
   tokens?: {
-    access?: { token?: string };
-    refresh?: { token?: string };
+    accessToken?: string;
+    refreshToken?: string;
   };
   user?: unknown;
   message?: string;
@@ -65,6 +65,17 @@ export interface RegisterPayload extends LoginPayload {
   name: string;
 }
 
+export interface GoogleLoginPayload {
+  token: string;
+}
+
+export interface AppleLoginPayload {
+  identityToken: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 function createDeviceId() {
   const maybeCrypto = globalThis.crypto as Crypto | undefined;
   if (maybeCrypto?.randomUUID) {
@@ -84,11 +95,13 @@ export function getDeviceId() {
 
 function extractTokens(value: ApiResponse<unknown> | AuthTokens): AuthTokens | null {
   if ('accessToken' in value && 'refreshToken' in value) {
-    return value;
+    return value.accessToken && value.refreshToken
+      ? { accessToken: value.accessToken, refreshToken: value.refreshToken }
+      : null;
   }
 
-  const accessToken = value.tokens?.access?.token;
-  const refreshToken = value.tokens?.refresh?.token;
+  const accessToken = value.tokens?.accessToken;
+  const refreshToken = value.tokens?.refreshToken;
   return accessToken && refreshToken ? { accessToken, refreshToken } : null;
 }
 
@@ -104,6 +117,9 @@ function normalizeUser(raw: any): User {
     email: raw?.email ?? '',
     avatar: raw?.avatar ?? buildAvatar(raw?.name, raw?.email),
     username: raw?.username,
+    image: raw?.image,
+    bio: raw?.bio,
+    timezone: raw?.timezone,
     type: raw?.type,
     source: raw?.source,
     createdAt: raw?.createdAt,
@@ -390,6 +406,39 @@ export async function register(payload: RegisterPayload): Promise<User> {
   return user;
 }
 
+export async function loginWithGoogle(payload: GoogleLoginPayload): Promise<User> {
+  const data = await apiFetch<ApiResponse<unknown>>('/auth/google-login', {
+    method: 'POST',
+    body: JSON.stringify({
+      token: payload.token,
+      deviceId: getDeviceId(),
+    }),
+  });
+
+  const user = normalizeUser(data.user);
+  const tokens = extractTokens(data);
+  setStoredSession({ user, tokens });
+  return user;
+}
+
+export async function loginWithApple(payload: AppleLoginPayload): Promise<User> {
+  const data = await apiFetch<ApiResponse<unknown>>('/auth/apple-login', {
+    method: 'POST',
+    body: JSON.stringify({
+      identityToken: payload.identityToken,
+      name: payload.name,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      deviceId: getDeviceId(),
+    }),
+  });
+
+  const user = normalizeUser(data.user);
+  const tokens = extractTokens(data);
+  setStoredSession({ user, tokens });
+  return user;
+}
+
 export async function logout(): Promise<void> {
   const current = getStoredSession();
 
@@ -407,6 +456,13 @@ export async function logout(): Promise<void> {
 
 export async function fetchMe(): Promise<User> {
   const data = await apiFetch<ApiResponse<any>>('/auth/me', {}, { auth: true });
+  const user = normalizeUser(data.data);
+  setStoredSession({ user, tokens: getStoredSession().tokens });
+  return user;
+}
+
+export async function fetchUserProfile(): Promise<User> {
+  const data = await apiFetch<ApiResponse<any>>('/user/profile', {}, { auth: true });
   const user = normalizeUser(data.data);
   setStoredSession({ user, tokens: getStoredSession().tokens });
   return user;
@@ -456,6 +512,21 @@ export async function createMix(payload: CreateMixPayload): Promise<Mix> {
   }, { auth: true });
 
   return mapMix(data.data);
+}
+
+export async function updateMix(id: string, payload: CreateMixPayload): Promise<Mix> {
+  const data = await apiFetch<ApiResponse<any>>(`/mix/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  }, { auth: true });
+
+  return mapMix(data.data);
+}
+
+export async function deleteMix(id: string): Promise<void> {
+  await apiFetch(`/mix/${id}`, {
+    method: 'DELETE',
+  }, { auth: true });
 }
 
 export async function logMixPlay(id: string): Promise<void> {

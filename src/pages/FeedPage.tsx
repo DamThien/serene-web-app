@@ -19,6 +19,7 @@ const resolveSoundId = (value: unknown) => {
 export const FeedPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('All');
+  const [activeTab, setActiveTab] = useState<'community' | 'yours'>('community');
   const [apiMixes, setApiMixes] = useState<Mix[]>([]);
   const [mixesLoading, setMixesLoading] = useState(true);
   const deferredQuery = useDeferredValue(query);
@@ -46,15 +47,22 @@ export const FeedPage: React.FC = () => {
   const loadTracks = useMixerStore(state => state.loadTracks);
   const setMixName = useMixerStore(state => state.setMixName);
   const setMixDesc = useMixerStore(state => state.setMixDesc);
+  const setPublic = useMixerStore(state => state.setPublic);
+  const setSelectedSilentFrequencies = useMixerStore(state => state.setSelectedSilentFrequencies);
+  const setSelectedFrequencyLayer = useMixerStore(state => state.setSelectedFrequencyLayer);
+  const setActiveMixContext = useMixerStore(state => state.setActiveMixContext);
   const setPage = useMixerStore(state => state.setPage);
+  const user = useMixerStore(state => state.user);
 
   const engine = useAudioEngineContext();
 
-  const publicOwn = savedMixes.filter(m => m.isPublic).map(m => ({ ...m, isOwn: true }));
-  const allMixes: Mix[] = [...publicOwn, ...apiMixes];
+  const ownMixes = savedMixes.map(m => ({ ...m, isOwn: true }));
+  const publicOwn = ownMixes.filter(m => m.isPublic);
+  const communityMixes: Mix[] = [...publicOwn, ...apiMixes];
+  const sourceMixes = activeTab === 'community' ? communityMixes : ownMixes;
 
   const visible = useMemo(() => {
-    let list = [...allMixes];
+    let list = [...sourceMixes];
     const q = deferredQuery.toLowerCase();
 
     if (filter === 'Popular') {
@@ -71,8 +79,9 @@ export const FeedPage: React.FC = () => {
     }
 
     return list;
-  }, [deferredQuery, filter, savedMixes, apiMixes]);
+  }, [deferredQuery, filter, sourceMixes]);
 
+  const allMixes = activeTab === 'community' ? communityMixes : ownMixes;
   const playingMix = allMixes.find(m => m._id === feedPlayingId);
   const isThisPlaying = (id: string) => feedPlayingId === id && isPlaying;
 
@@ -117,6 +126,10 @@ export const FeedPage: React.FC = () => {
     loadTracks(newTracks);
     setMixName(mix.name);
     setMixDesc(mix.description ?? '');
+    setPublic(Boolean(mix.isPublic && mix.isOwn));
+    setSelectedSilentFrequencies(mix.silentFrequencies ?? []);
+    setSelectedFrequencyLayer(mix.frequencyLayer ?? null);
+    setActiveMixContext(mix.isOwn ? mix._id : null, Boolean(mix.isOwn));
     setPlaying(false);
 
     newTracks.forEach(track => engine.play(track.soundId, track.url, track.volume));
@@ -148,7 +161,7 @@ export const FeedPage: React.FC = () => {
     }
 
     toast(`Now playing: ${mix.name}`);
-  }, [feedPlayingId, isPlaying, engine, setFeedPlayingId, loadTracks, setMixName, setMixDesc, setPlaying]);
+  }, [feedPlayingId, isPlaying, engine, setFeedPlayingId, loadTracks, setMixName, setMixDesc, setPublic, setSelectedSilentFrequencies, setSelectedFrequencyLayer, setActiveMixContext, setPlaying]);
 
   const handleOpenInStudio = (mix: Mix) => {
     void handlePlay(mix);
@@ -158,11 +171,27 @@ export const FeedPage: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto px-7 py-7">
       <div className="mb-6">
-        <h1 className="font-['Instrument_Serif'] italic text-[32px] text-[var(--bright)] mb-1.5">
-          Community Mixes
-        </h1>
+        <div className="flex items-center gap-2 flex-wrap mb-2">
+          <button
+            onClick={() => setActiveTab('community')}
+            className={`font-['Instrument_Serif'] italic text-[32px] leading-none transition-colors ${activeTab === 'community' ? 'text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+          >
+            Community Mixes
+          </button>
+          <span className="text-[var(--dim)] text-[28px]">/</span>
+          <button
+            onClick={() => setActiveTab('yours')}
+            className={`font-['Instrument_Serif'] italic text-[32px] leading-none transition-colors ${activeTab === 'yours' ? 'text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+          >
+            Your Mixes
+          </button>
+        </div>
         <p className="text-sm text-[var(--mid)]">
-          Discover soundscapes crafted by the Serene community
+          {activeTab === 'community'
+            ? 'Discover soundscapes crafted by the Serene community'
+            : user
+              ? 'Browse the mixes saved to your own account'
+              : 'Sign in to see mixes saved to your account'}
         </p>
       </div>
 
@@ -172,7 +201,7 @@ export const FeedPage: React.FC = () => {
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search mixes, creators..."
+          placeholder={activeTab === 'community' ? 'Search mixes, creators...' : 'Search your mixes...'}
           className="flex-1 bg-transparent border-none outline-none text-sm text-[var(--bright)] placeholder:text-[var(--dim)]"
         />
       </div>
@@ -225,7 +254,13 @@ export const FeedPage: React.FC = () => {
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-[var(--dim)]">
           <span className="text-5xl opacity-30">music</span>
-          <p className="text-sm">No mixes found</p>
+          <p className="text-sm">
+            {activeTab === 'community'
+              ? 'No mixes found'
+              : user
+                ? 'You have no saved mixes yet'
+                : 'Sign in to view your mixes'}
+          </p>
         </div>
       ) : (
         <div className="feed-grid">

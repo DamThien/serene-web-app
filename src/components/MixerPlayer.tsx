@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Clock, Crown, Pause, Play, Save, Square, Volume2 } from 'lucide-react';
+import { Clock, Crown, Pause, Play, Save, Square, Trash2, Volume2 } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
-import { createMix, isAuthenticated } from '../services/api';
+import { createMix, deleteMix, isAuthenticated, updateMix } from '../services/api';
 import { useAudioEngineContext } from './AudioEngineProvider';
-import { WaveformViz } from './WaveformViz';
 import { toast } from './Toast';
 
 export const MixerPlayer: React.FC = () => {
@@ -13,23 +12,31 @@ export const MixerPlayer: React.FC = () => {
   const mixName = useMixerStore((state) => state.mixName);
   const mixDesc = useMixerStore((state) => state.mixDesc);
   const isPublic = useMixerStore((state) => state.isPublic);
+  const activeMixId = useMixerStore((state) => state.activeMixId);
+  const activeMixOwned = useMixerStore((state) => state.activeMixOwned);
+  const setActiveMixContext = useMixerStore((state) => state.setActiveMixContext);
   const masterVolume = useMixerStore((state) => state.masterVolume);
   const setMasterVolume = useMixerStore((state) => state.setMasterVolume);
   const sleepMins = useMixerStore((state) => state.sleepMins);
   const setSleepMins = useMixerStore((state) => state.setSleepMins);
   const addSavedMix = useMixerStore((state) => state.addSavedMix);
+  const upsertSavedMix = useMixerStore((state) => state.upsertSavedMix);
+  const removeSavedMix = useMixerStore((state) => state.deleteSavedMix);
+  const resetMix = useMixerStore((state) => state.resetMix);
   const selectedSilentFrequencies = useMixerStore((state) => state.selectedSilentFrequencies);
   const selectedFrequencyLayer = useMixerStore((state) => state.selectedFrequencyLayer);
   const premiumUnlocked = useMixerStore((state) => state.isPremiumUnlocked());
 
   const engine = useAudioEngineContext();
-  const analyser = engine.getAnalyser();
   const [elapsed, setElapsed] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerBtnRef = useRef<HTMLButtonElement>(null);
   const timerDDRef = useRef<HTMLDivElement>(null);
+  const elapsedRef = useRef(0);
 
   const handlePause = useCallback(() => {
     engine.pauseAll();
@@ -40,6 +47,7 @@ export const MixerPlayer: React.FC = () => {
   const handleStop = useCallback(() => {
     engine.stopAll();
     setPlaying(false);
+    elapsedRef.current = 0;
     setElapsed(0);
     engine.setMediaSessionState('none');
   }, [engine, setPlaying]);
@@ -47,21 +55,26 @@ export const MixerPlayer: React.FC = () => {
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
-        setElapsed((value) => {
-          const next = value + 1;
+        const next = elapsedRef.current + 1;
+        elapsedRef.current = next;
 
-          if (sleepMins > 0 && next >= sleepMins * 60) {
-            handleStop();
-            toast('Sleep timer ended');
-          }
+        if (sleepMins > 0 && next >= sleepMins * 60) {
+          handleStop();
+          toast('Sleep timer ended');
+          return;
+        }
 
-          if (!premiumUnlocked && next >= 30 && tracks.some((track) => track.isPremium)) {
-            handlePause();
-            toast('Premium preview finished at 30 seconds');
-          }
+        if (!premiumUnlocked && next >= 30 && tracks.some((track) => track.isPremium)) {
+          handlePause();
+          setElapsed(next);
+          toast('Premium preview finished at 30 seconds');
+          return;
+        }
 
-          return next;
-        });
+        // Update the visible timer less frequently to reduce React re-renders during playback.
+        if (next <= 3 || next % 5 === 0) {
+          setElapsed(next);
+        }
       }, 1000);
     } else if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -120,6 +133,21 @@ export const MixerPlayer: React.FC = () => {
     engine.setMasterVolume(value);
   };
 
+  const buildPayload = () => ({
+    name: mixName,
+    description: mixDesc,
+    icon: tracks[0]?.icon,
+    sounds: tracks.map((track) => ({
+      soundId: track.soundId,
+      volume: Math.round(track.volume * 100),
+    })),
+    silentFrequencies: selectedSilentFrequencies.map((item) => ({
+      silentFrequencyId: item.id,
+    })),
+    frequencyLayer: selectedFrequencyLayer ? { hz: selectedFrequencyLayer.hz } : null,
+    isPublic,
+  });
+
   const handleSave = async () => {
     if (!isAuthenticated()) {
       toast('Sign in before saving a mix');
@@ -139,33 +167,53 @@ export const MixerPlayer: React.FC = () => {
     setSaving(true);
 
     try {
-      const mix = await createMix({
-        name: mixName,
-        description: mixDesc,
-        icon: tracks[0]?.icon,
-        sounds: tracks.map((track) => ({
-          soundId: track.soundId,
-          volume: Math.round(track.volume * 100),
-        })),
-        silentFrequencies: selectedSilentFrequencies.map((item) => ({
-          silentFrequencyId: item.id,
-        })),
-        frequencyLayer: selectedFrequencyLayer ? { hz: selectedFrequencyLayer.hz } : null,
-        isPublic,
-      });
+      const payload = buildPayload();
+      const mix = activeMixId && activeMixOwned
+        ? await updateMix(activeMixId, payload)
+        : await createMix(payload);
 
-      addSavedMix({
+      const normalizedMix = {
         ...mix,
         icon: mix.icon || tracks[0].icon,
         tags: [...new Set(tracks.map((track) => track.cat.toLowerCase()))],
         isOwn: true,
-      });
+      };
 
-      toast(isPublic ? 'Mix saved and marked public' : 'Mix saved privately');
+      if (activeMixId && activeMixOwned) {
+        upsertSavedMix(normalizedMix);
+        toast('Mix updated successfully');
+      } else {
+        addSavedMix(normalizedMix);
+        toast(isPublic ? 'Mix saved to your library' : 'Private mix saved');
+      }
+
+      setActiveMixContext(normalizedMix._id, true);
     } catch (error) {
       toast(error instanceof Error ? error.message : 'Could not save mix');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!activeMixId || !activeMixOwned) {
+      setConfirmDeleteOpen(false);
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      await deleteMix(activeMixId);
+      removeSavedMix(activeMixId);
+      handleStop();
+      resetMix();
+      setConfirmDeleteOpen(false);
+      toast('Mix deleted');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Could not delete mix');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -191,128 +239,169 @@ export const MixerPlayer: React.FC = () => {
   const nowSub = tracks.length ? tracks.map((track) => track.title).join(' · ') : 'Add sounds to begin';
   const masterPct = Math.round(masterVolume * 100);
   const visibilityLabel = isPublic ? 'Public' : 'Private';
+  const saveLabel = activeMixId && activeMixOwned ? 'Update Mix' : 'Save Mix';
 
   return (
-    <div className="player-bar flex items-center px-5 gap-4 border-t border-[var(--line)] bg-[var(--ink2)] flex-shrink-0 relative z-10">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="player-icon rounded-xl bg-white flex items-center justify-center flex-shrink-0">
-          <img
-            src={import.meta.env.BASE_URL + `sound_icons/${nowIcon}.svg`}
-            alt={nowIcon}
-            className="w-8 h-8"
-          />
-        </div>
-        <div className="min-w-0 hidden sm:block">
-          <div className="text-sm font-medium text-[var(--bright)] truncate max-w-[200px]">{nowName}</div>
-          <div className="text-xs text-[var(--mid)] truncate max-w-[240px] mt-0.5">{nowSub}</div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <WaveformViz analyser={analyser} playing={isPlaying} barCount={18} />
-
-        <button
-          onClick={handleTogglePlay}
-          className="play-btn rounded-full bg-[var(--sage2)] flex items-center justify-center text-white transition-all duration-150 hover:bg-[var(--sage)] hover:scale-105 active:scale-95"
-        >
-          {isPlaying
-            ? <Pause size={22} fill="white" />
-            : <Play size={22} fill="white" className="translate-x-0.5" />
-          }
-        </button>
-
-        <button
-          onClick={handleStop}
-          title="Stop"
-          className="stop-btn rounded-lg border border-[var(--line2)] text-[var(--mid)] flex items-center justify-center transition-all duration-150 hover:bg-[var(--ink3)] hover:text-[var(--soft)]"
-        >
-          <Square size={15} fill="currentColor" />
-        </button>
-
-        <span className="text-sm text-[var(--mid)] tabular-nums w-12 hidden sm:block">{fmt(elapsed)}</span>
-      </div>
-
-      <div className="flex items-center gap-3 flex-1 justify-end">
-        <div className="hidden md:flex items-center gap-2">
-          <Volume2 size={15} className="text-[var(--mid)]" />
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={masterVolume}
-            onChange={handleMasterVol}
-            className="w-24"
-            style={{ background: `linear-gradient(to right, var(--soft) ${masterPct}%, var(--ink4) ${masterPct}%)` }}
-          />
+    <>
+      <div className="player-bar flex items-center px-5 gap-4 border-t border-[var(--line)] bg-[var(--ink2)] flex-shrink-0 relative z-10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="player-icon rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+            <img
+              src={import.meta.env.BASE_URL + `sound_icons/${nowIcon}.svg`}
+              alt={nowIcon}
+              className="w-8 h-8"
+            />
+          </div>
+          <div className="min-w-0 hidden sm:block">
+            <div className="text-sm font-medium text-[var(--bright)] truncate max-w-[200px]">{nowName}</div>
+            <div className="text-xs text-[var(--mid)] truncate max-w-[240px] mt-0.5">{nowSub}</div>
+          </div>
         </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-4">
           <button
-            ref={timerBtnRef}
-            onClick={() => setTimerOpen((value) => !value)}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-all duration-150 ${sleepMins > 0 ? 'border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)]'}`}
+            onClick={handleTogglePlay}
+            className="play-btn rounded-full bg-[var(--sage2)] flex items-center justify-center text-white transition-all duration-150 hover:bg-[var(--sage)] hover:scale-105 active:scale-95"
           >
-            <Clock size={13} />
-            <span className="hidden sm:inline">{sleepMins > 0 ? `${sleepMins}m` : 'Timer'}</span>
+            {isPlaying
+              ? <Pause size={22} fill="white" />
+              : <Play size={22} fill="white" className="translate-x-0.5" />
+            }
           </button>
 
-          {timerOpen && (
-            <div
-              ref={timerDDRef}
-              className="absolute bottom-full right-0 mb-2 bg-[var(--ink3)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.5)] min-w-[150px] anim-fade z-50"
+          <button
+            onClick={handleStop}
+            title="Stop"
+            className="stop-btn rounded-lg border border-[var(--line2)] text-[var(--mid)] flex items-center justify-center transition-all duration-150 hover:bg-[var(--ink3)] hover:text-[var(--soft)]"
+          >
+            <Square size={15} fill="currentColor" />
+          </button>
+
+          <span className="text-sm text-[var(--mid)] tabular-nums w-12 hidden sm:block">{fmt(elapsed)}</span>
+        </div>
+
+        <div className="flex items-center gap-3 flex-1 justify-end">
+          <div className="hidden md:flex items-center gap-2">
+            <Volume2 size={15} className="text-[var(--mid)]" />
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={masterVolume}
+              onChange={handleMasterVol}
+              className="w-24"
+              style={{ background: `linear-gradient(to right, var(--soft) ${masterPct}%, var(--ink4) ${masterPct}%)` }}
+            />
+          </div>
+
+          <div className="relative">
+            <button
+              ref={timerBtnRef}
+              onClick={() => setTimerOpen((value) => !value)}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-all duration-150 ${sleepMins > 0 ? 'border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)]'}`}
             >
-              {timerOptions.map((minutes) => (
-                <button
-                  key={minutes}
-                  onClick={() => {
-                    setSleepMins(minutes);
-                    setTimerOpen(false);
-                    toast(`Sleep timer: ${minutes} min`);
-                  }}
-                  className={`w-full text-left text-sm px-4 py-2.5 rounded-lg transition-colors ${sleepMins === minutes ? 'text-[var(--gold)]' : 'text-[var(--soft)] hover:bg-[var(--ink4)]'}`}
-                >
-                  {minutes} minutes
-                </button>
-              ))}
-              {sleepMins > 0 && (
-                <button
-                  onClick={() => {
-                    setSleepMins(0);
-                    setTimerOpen(false);
-                    toast('Timer cancelled');
-                  }}
-                  className="w-full text-left text-sm px-4 py-2.5 rounded-lg text-[var(--blush)] hover:bg-[var(--ink4)] transition-colors border-t border-[var(--line)] mt-1 pt-2.5"
-                >
-                  Cancel timer
-                </button>
-              )}
+              <Clock size={13} />
+              <span className="hidden sm:inline">{sleepMins > 0 ? `${sleepMins}m` : 'Timer'}</span>
+            </button>
+
+            {timerOpen && (
+              <div
+                ref={timerDDRef}
+                className="absolute bottom-full right-0 mb-2 bg-[var(--ink3)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.5)] min-w-[150px] anim-fade z-50"
+              >
+                {timerOptions.map((minutes) => (
+                  <button
+                    key={minutes}
+                    onClick={() => {
+                      setSleepMins(minutes);
+                      setTimerOpen(false);
+                      toast(`Sleep timer: ${minutes} min`);
+                    }}
+                    className={`w-full text-left text-sm px-4 py-2.5 rounded-lg transition-colors ${sleepMins === minutes ? 'text-[var(--gold)]' : 'text-[var(--soft)] hover:bg-[var(--ink4)]'}`}
+                  >
+                    {minutes} minutes
+                  </button>
+                ))}
+                {sleepMins > 0 && (
+                  <button
+                    onClick={() => {
+                      setSleepMins(0);
+                      setTimerOpen(false);
+                      toast('Timer cancelled');
+                    }}
+                    className="w-full text-left text-sm px-4 py-2.5 rounded-lg text-[var(--blush)] hover:bg-[var(--ink4)] transition-colors border-t border-[var(--line)] mt-1 pt-2.5"
+                  >
+                    Cancel timer
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {!premiumUnlocked && tracks.some((track) => track.isPremium) && (
+            <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-[var(--gold)] border border-[rgba(214,178,74,0.25)] rounded-full px-3 py-1.5">
+              <Crown size={12} />
+              Trial locks after 30s
             </div>
           )}
-        </div>
 
-        {!premiumUnlocked && tracks.some((track) => track.isPremium) && (
-          <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-[var(--gold)] border border-[rgba(214,178,74,0.25)] rounded-full px-3 py-1.5">
-            <Crown size={12} />
-            Trial locks after 30s
+          {activeMixId && activeMixOwned && (
+            <button
+              onClick={() => setConfirmDeleteOpen(true)}
+              disabled={saving || deleting}
+              className="w-10 h-10 rounded-lg border border-[rgba(196,126,142,0.35)] text-[var(--blush)] hover:bg-[rgba(196,126,142,0.08)] transition-all flex items-center justify-center disabled:opacity-50"
+              title="Delete mix"
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={() => void handleSave()}
+              disabled={saving || deleting}
+              className={`flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg text-white border-none transition-all duration-150 hover:opacity-85 disabled:opacity-50 ${isPublic ? 'bg-[var(--sage2)]' : 'bg-[#4c4580]'}`}
+            >
+              <Save size={14} />
+              <span className="hidden sm:inline">{saving ? 'Saving...' : saveLabel}</span>
+            </button>
+            <span className="text-[10px] text-[var(--dim)] cursor-default hidden sm:block">
+              {visibilityLabel}
+              {selectedSilentFrequencies.length > 0 || selectedFrequencyLayer ? ' with layers' : ''}
+            </span>
           </div>
-        )}
-
-        <div className="flex flex-col items-end gap-0.5">
-          <button
-            onClick={() => void handleSave()}
-            disabled={saving}
-            className={`flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg text-white border-none transition-all duration-150 hover:opacity-85 disabled:opacity-50 ${isPublic ? 'bg-[var(--sage2)]' : 'bg-[#4c4580]'}`}
-          >
-            <Save size={14} />
-            <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save Mix'}</span>
-          </button>
-          <span className="text-[10px] text-[var(--dim)] cursor-default hidden sm:block">
-            {visibilityLabel}
-            {selectedSilentFrequencies.length > 0 || selectedFrequencyLayer ? ' with layers' : ''}
-          </span>
         </div>
       </div>
-    </div>
+
+      {confirmDeleteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-6">
+          <div className="w-full max-w-sm rounded-3xl border border-[var(--line2)] bg-[var(--ink2)] p-6 shadow-[0_24px_64px_rgba(0,0,0,.55)]">
+            <h3 className="font-['Instrument_Serif'] italic text-[26px] text-[var(--bright)] mb-2">
+              Delete this mix?
+            </h3>
+            <p className="text-sm text-[var(--mid)] leading-relaxed mb-6">
+              This will remove <span className="text-[var(--soft)]">{mixName || 'this mix'}</span> from your library. This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setConfirmDeleteOpen(false)}
+                disabled={deleting}
+                className="px-4 py-2.5 rounded-xl border border-[var(--line)] text-[var(--soft)] hover:bg-[var(--ink3)] transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleDelete()}
+                disabled={deleting}
+                className="px-4 py-2.5 rounded-xl bg-[var(--blush)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete Mix'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

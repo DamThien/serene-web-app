@@ -4,6 +4,7 @@ import { Topbar } from './components/Topbar';
 import { ToastContainer, toast } from './components/Toast';
 import { StudioPage } from './pages/StudioPage';
 import { FeedPage } from './pages/FeedPage';
+import { AccountPage } from './pages/AccountPage';
 import { useMixerStore } from './store/mixerStore';
 import {
   fetchFavoriteSounds,
@@ -22,6 +23,14 @@ const Pages: React.FC = () => {
     return (
       <div className="flex-col flex-1 overflow-hidden flex">
         <StudioPage />
+      </div>
+    );
+  }
+
+  if (page === 'account') {
+    return (
+      <div className="flex-col flex-1 overflow-hidden flex">
+        <AccountPage />
       </div>
     );
   }

@@ -78,6 +78,9 @@ export interface User {
   email: string;
   avatar: string;
   username?: string;
+  image?: string;
+  bio?: string;
+  timezone?: string;
   type?: string;
   source?: string;
   createdAt?: string;
@@ -108,5 +111,5 @@ export interface Subscription {
   willCancelAtPeriodEnd?: boolean;
 }
 
-export type Page = 'studio' | 'feed';
+export type Page = 'studio' | 'feed' | 'account';
 export type Visibility = 'private' | 'public';

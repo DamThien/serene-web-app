@@ -17,6 +17,9 @@ export default defineConfig(({ command }) => {
     build: { outDir: 'dist' },
 
     server: {
+      host: 'localhost',
+      port: 5173,
+      strictPort: true,
       proxy: {
         '/audio': {
           target: 'https://serene-api.shapeecloud.com/',
