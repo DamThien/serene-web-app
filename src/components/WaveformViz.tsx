@@ -1,37 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useWaveform } from '../hooks/useWaveform';
 
 interface Props {
+  analyser: AnalyserNode | null;
   playing: boolean;
   barCount?: number;
 }
 
-export const WaveformViz: React.FC<Props> = ({ playing, barCount = 16 }) => {
-  const bars = Array.from({ length: barCount }, (_, i) => i);
+export const WaveformViz: React.FC<Props> = React.memo(({ analyser, playing, barCount = 20 }) => {
+  const { levels } = useWaveform({ analyser, playing, barCount });
+
+  const bars = useMemo(() => levels.map((level, index) => {
+    const hueShift = (index / Math.max(levels.length - 1, 1)) * 18;
+
+    return {
+      id: index,
+      level,
+      color: `color-mix(in srgb, var(--sage) ${88 - hueShift}%, white ${12 + hueShift}%)`,
+    };
+  }), [levels]);
 
   return (
-    <div className="flex items-center gap-[2px] h-7">
-      {bars.map(i => {
-        const seed = ((i * 7 + 3) % barCount) / barCount;
-        const h = Math.round(4 + seed * 22);
-        const delay = (i * 0.05).toFixed(2);
-        const dur = (0.4 + seed * 0.5).toFixed(2);
-        return (
-          <div
-            key={i}
-            className="flex-1 rounded-[1px] bg-[var(--sage)]"
-            style={{
-              height: playing ? `${h}px` : '3px',
-              opacity: playing ? 0.85 : 0.3,
-              transform: 'scaleY(1)',
-              transformOrigin: 'bottom',
-              transition: playing ? 'none' : 'all 0.3s ease',
-              animation: playing
-                ? `waveAnim ${dur}s ease-in-out ${delay}s infinite alternate`
-                : 'none',
-            }}
-          />
-        );
-      })}
+    <div className="waveform-viz" aria-hidden="true">
+      {bars.map(bar => (
+        <div
+          key={bar.id}
+          className="waveform-bar"
+          style={{
+            height: `${Math.max(8, Math.round(bar.level * 30))}px`,
+            opacity: 0.3 + bar.level * 0.85,
+            background: bar.color,
+            transform: `scaleY(${0.75 + bar.level * 0.35}) translateZ(0)`,
+          }}
+        />
+      ))}
     </div>
   );
-};
+});

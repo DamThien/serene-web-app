@@ -1,10 +1,18 @@
 import { create } from 'zustand';
-import type { Track, Mix, User, Page } from '../types';
+import type {
+  FrequencyLayer,
+  Mix,
+  Page,
+  SilentFrequency,
+  Subscription,
+  SubscriptionPlan,
+  Track,
+  User,
+} from '../types';
 
 export interface MixerState {
-  // ── Tracks ─────────────────────────────────────────────
   tracks: Track[];
-  addTrack: (t: Omit<Track, 'loop' | 'muted' | 'solo'>) => boolean; // returns false if limit hit
+  addTrack: (track: Omit<Track, 'loop' | 'muted' | 'solo'>) => boolean;
   removeTrack: (soundId: string) => void;
   updateVolume: (soundId: string, volume: number) => void;
   toggleMute: (soundId: string) => void;
@@ -12,123 +20,194 @@ export interface MixerState {
   clearTracks: () => void;
   loadTracks: (tracks: Track[]) => void;
 
-  // ── Playback ────────────────────────────────────────────
   isPlaying: boolean;
-  setPlaying: (v: boolean) => void;
+  setPlaying: (value: boolean) => void;
 
-  // ── Mix metadata ────────────────────────────────────────
   mixName: string;
   mixDesc: string;
   isPublic: boolean;
-  setMixName: (v: string) => void;
-  setMixDesc: (v: string) => void;
-  setPublic: (v: boolean) => void;
+  selectedSilentFrequencies: SilentFrequency[];
+  selectedFrequencyLayer: FrequencyLayer | null;
+  setMixName: (value: string) => void;
+  setMixDesc: (value: string) => void;
+  setPublic: (value: boolean) => void;
+  setSelectedSilentFrequencies: (items: SilentFrequency[]) => void;
+  toggleSilentFrequency: (item: SilentFrequency) => boolean;
+  setSelectedFrequencyLayer: (item: FrequencyLayer | null) => void;
   resetMix: () => void;
 
-  // ── Master volume ───────────────────────────────────────
   masterVolume: number;
-  setMasterVolume: (v: number) => void;
+  setMasterVolume: (value: number) => void;
 
-  // ── Sleep timer ─────────────────────────────────────────
   sleepMins: number;
-  setSleepMins: (v: number) => void;
+  setSleepMins: (value: number) => void;
 
-  // ── Saved mixes ─────────────────────────────────────────
   savedMixes: Mix[];
-  addSavedMix: (m: Mix) => void;
+  setSavedMixes: (mixes: Mix[]) => void;
+  addSavedMix: (mix: Mix) => void;
+  upsertSavedMix: (mix: Mix) => void;
   deleteSavedMix: (id: string) => void;
 
-  // ── Auth ────────────────────────────────────────────────
   user: User | null;
-  setUser: (u: User | null) => void;
+  authReady: boolean;
+  favoriteSoundIds: string[];
+  subscription: Subscription | null;
+  subscriptionPlans: SubscriptionPlan[];
+  setUser: (user: User | null) => void;
+  setAuthReady: (value: boolean) => void;
+  setFavoriteSoundIds: (ids: string[]) => void;
+  toggleFavoriteSoundId: (id: string, next?: boolean) => void;
+  setSubscription: (subscription: Subscription | null) => void;
+  setSubscriptionPlans: (plans: SubscriptionPlan[]) => void;
+  isPremiumUnlocked: () => boolean;
 
-  // ── Navigation ──────────────────────────────────────────
   page: Page;
-  setPage: (p: Page) => void;
+  setPage: (page: Page) => void;
 
-  // ── Feed playback ───────────────────────────────────────
   feedPlayingId: string | null;
   setFeedPlayingId: (id: string | null) => void;
 }
 
 const MAX_TRACKS = 6;
+const MAX_SILENT_FREQUENCIES = 2;
 
 export const useMixerStore = create<MixerState>((set, get) => ({
-  // ── Tracks ─────────────────────────────────────────────
   tracks: [],
-
-  addTrack: (t) => {
+  addTrack: (track) => {
     const { tracks } = get();
     if (tracks.length >= MAX_TRACKS) return false;
-    if (tracks.find(x => x.soundId === t.soundId)) return false;
-    set(s => ({
-      tracks: [...s.tracks, { ...t, loop: true, muted: false, solo: false }],
+    if (tracks.find((item) => item.soundId === track.soundId)) return false;
+
+    set((state) => ({
+      tracks: [...state.tracks, { ...track, loop: true, muted: false, solo: false }],
     }));
     return true;
   },
-
   removeTrack: (soundId) =>
-    set(s => ({ tracks: s.tracks.filter(t => t.soundId !== soundId) })),
-
+    set((state) => ({
+      tracks: state.tracks.filter((track) => track.soundId !== soundId),
+    })),
   updateVolume: (soundId, volume) =>
-    set(s => ({
-      tracks: s.tracks.map(t => t.soundId === soundId ? { ...t, volume } : t),
+    set((state) => ({
+      tracks: state.tracks.map((track) => (
+        track.soundId === soundId ? { ...track, volume } : track
+      )),
     })),
-
   toggleMute: (soundId) =>
-    set(s => ({
-      tracks: s.tracks.map(t => t.soundId === soundId ? { ...t, muted: !t.muted } : t),
+    set((state) => ({
+      tracks: state.tracks.map((track) => (
+        track.soundId === soundId ? { ...track, muted: !track.muted } : track
+      )),
     })),
-
   toggleSolo: (soundId) =>
-    set(s => {
-      const already = s.tracks.find(t => t.soundId === soundId)?.solo ?? false;
+    set((state) => {
+      const active = state.tracks.find((track) => track.soundId === soundId)?.solo ?? false;
       return {
-        tracks: s.tracks.map(t =>
-          already ? { ...t, solo: false } : { ...t, solo: t.soundId === soundId }
-        ),
+        tracks: state.tracks.map((track) => (
+          active ? { ...track, solo: false } : { ...track, solo: track.soundId === soundId }
+        )),
       };
     }),
-
   clearTracks: () => set({ tracks: [] }),
-
   loadTracks: (tracks) => set({ tracks }),
 
-  // ── Playback ────────────────────────────────────────────
   isPlaying: false,
-  setPlaying: (v) => set({ isPlaying: v }),
+  setPlaying: (value) => set({ isPlaying: value }),
 
-  // ── Mix metadata ────────────────────────────────────────
   mixName: '',
   mixDesc: '',
   isPublic: false,
-  setMixName: (v) => set({ mixName: v }),
-  setMixDesc: (v) => set({ mixDesc: v }),
-  setPublic:  (v) => set({ isPublic: v }),
-  resetMix: () => set({ mixName:'', mixDesc:'', isPublic:false, tracks:[], isPlaying:false }),
+  selectedSilentFrequencies: [],
+  selectedFrequencyLayer: null,
+  setMixName: (value) => set({ mixName: value }),
+  setMixDesc: (value) => set({ mixDesc: value }),
+  setPublic: (value) => set({ isPublic: value }),
+  setSelectedSilentFrequencies: (items) =>
+    set({ selectedSilentFrequencies: items.slice(0, MAX_SILENT_FREQUENCIES) }),
+  toggleSilentFrequency: (item) => {
+    const current = get().selectedSilentFrequencies;
+    const exists = current.some((entry) => entry.id === item.id);
 
-  // ── Master volume ───────────────────────────────────────
+    if (exists) {
+      set({
+        selectedSilentFrequencies: current.filter((entry) => entry.id !== item.id),
+      });
+      return true;
+    }
+
+    if (current.length >= MAX_SILENT_FREQUENCIES) {
+      return false;
+    }
+
+    set({ selectedSilentFrequencies: [...current, item] });
+    return true;
+  },
+  setSelectedFrequencyLayer: (item) => set({ selectedFrequencyLayer: item }),
+  resetMix: () => set({
+    mixName: '',
+    mixDesc: '',
+    isPublic: false,
+    tracks: [],
+    isPlaying: false,
+    selectedSilentFrequencies: [],
+    selectedFrequencyLayer: null,
+  }),
+
   masterVolume: 1,
-  setMasterVolume: (v) => set({ masterVolume: v }),
+  setMasterVolume: (value) => set({ masterVolume: value }),
 
-  // ── Sleep timer ─────────────────────────────────────────
   sleepMins: 0,
-  setSleepMins: (v) => set({ sleepMins: v }),
+  setSleepMins: (value) => set({ sleepMins: value }),
 
-  // ── Saved mixes ─────────────────────────────────────────
   savedMixes: [],
-  addSavedMix: (m) => set(s => ({ savedMixes: [m, ...s.savedMixes] })),
-  deleteSavedMix: (id) => set(s => ({ savedMixes: s.savedMixes.filter(m => m._id !== id) })),
+  setSavedMixes: (mixes) => set({ savedMixes: mixes }),
+  addSavedMix: (mix) => set((state) => ({ savedMixes: [mix, ...state.savedMixes] })),
+  upsertSavedMix: (mix) => set((state) => {
+    const index = state.savedMixes.findIndex((item) => item._id === mix._id);
+    if (index === -1) {
+      return { savedMixes: [mix, ...state.savedMixes] };
+    }
 
-  // ── Auth ────────────────────────────────────────────────
+    const next = [...state.savedMixes];
+    next[index] = mix;
+    return { savedMixes: next };
+  }),
+  deleteSavedMix: (id) => set((state) => ({
+    savedMixes: state.savedMixes.filter((mix) => mix._id !== id),
+  })),
+
   user: null,
-  setUser: (u) => set({ user: u }),
+  authReady: false,
+  favoriteSoundIds: [],
+  subscription: null,
+  subscriptionPlans: [],
+  setUser: (user) => set({ user }),
+  setAuthReady: (value) => set({ authReady: value }),
+  setFavoriteSoundIds: (ids) => set({ favoriteSoundIds: ids }),
+  toggleFavoriteSoundId: (id, next) => set((state) => {
+    const exists = state.favoriteSoundIds.includes(id);
+    const shouldAdd = next ?? !exists;
 
-  // ── Navigation ──────────────────────────────────────────
+    if (shouldAdd && !exists) {
+      return { favoriteSoundIds: [...state.favoriteSoundIds, id] };
+    }
+
+    if (!shouldAdd && exists) {
+      return { favoriteSoundIds: state.favoriteSoundIds.filter((item) => item !== id) };
+    }
+
+    return state;
+  }),
+  setSubscription: (subscription) => set({ subscription }),
+  setSubscriptionPlans: (plans) => set({ subscriptionPlans: plans }),
+  isPremiumUnlocked: () => {
+    const subscription = get().subscription;
+    return Boolean(subscription?.isActive && subscription?.status !== 'expired');
+  },
+
   page: 'studio',
-  setPage: (p) => set({ page: p }),
+  setPage: (page) => set({ page }),
 
-  // ── Feed playback ───────────────────────────────────────
   feedPlayingId: null,
   setFeedPlayingId: (id) => set({ feedPlayingId: id }),
 }));

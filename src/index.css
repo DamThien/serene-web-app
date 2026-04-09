@@ -78,6 +78,31 @@ input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.25); }
 .anim-fade  { animation: fadeUp 0.25s ease both; }
 .pulse-ring { animation: pulseRing 1.4s ease-in-out infinite; }
 
+.waveform-viz {
+  width: 112px;
+  height: 32px;
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  flex-shrink: 0;
+  padding-bottom: 1px;
+}
+
+.waveform-bar {
+  width: 15px;
+  border-radius: 999px;
+  transform-origin: bottom;
+  will-change: transform, height, opacity;
+  transition: height 90ms linear, opacity 120ms ease-out, transform 90ms linear;
+  box-shadow: 0 0 10px rgba(126, 184, 160, 0.16);
+}
+
+.sidebar-virtual-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ═══════════════════════════════════════════════════════════
    PLAYER BAR — scaled & responsive
    ═══════════════════════════════════════════════════════════ */
@@ -103,6 +128,7 @@ input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.25); }
   .play-btn   { width: 48px; height: 48px; }
   .stop-btn   { width: 34px; height: 34px; }
   .player-icon { width: 42px; height: 42px; }
+  .waveform-viz { width: 88px; }
 }
 
 /* ═══════════════════════════════════════════════════════════

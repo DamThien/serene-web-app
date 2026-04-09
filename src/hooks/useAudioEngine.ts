@@ -41,10 +41,13 @@ export interface AudioEngine {
     onStop:  () => void;
   }) => void;
   setMediaSessionState: (state: 'playing' | 'paused' | 'none') => void;
+  getAnalyser:         () => AnalyserNode | null;
 }
 
 export function useAudioEngine(): AudioEngine {
   const howls = useRef<HowlMap>(new Map());
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const analyserConnectedRef = useRef(false);
   const msCallbacks = useRef<{
     onPlay:  () => void;
     onPause: () => void;
@@ -70,6 +73,41 @@ export function useAudioEngine(): AudioEngine {
     };
   }, []);
 
+  const ensureAnalyser = useCallback((): AnalyserNode | null => {
+    const howlerWithInternals = Howler as typeof Howler & {
+      ctx?: AudioContext;
+      masterGain?: GainNode;
+    };
+
+    const audioContext = howlerWithInternals.ctx;
+    const masterGain = howlerWithInternals.masterGain;
+
+    if (!audioContext || !masterGain) {
+      return null;
+    }
+
+    if (!analyserRef.current) {
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      analyserRef.current = analyser;
+    }
+
+    if (!analyserConnectedRef.current) {
+      try {
+        masterGain.disconnect();
+      } catch {
+        // already disconnected or browser-specific no-op
+      }
+
+      masterGain.connect(analyserRef.current);
+      analyserRef.current.connect(audioContext.destination);
+      analyserConnectedRef.current = true;
+    }
+
+    return analyserRef.current;
+  }, []);
+
   const getOrCreate = useCallback((soundId: string, url: string, volume: number): Howl => {
     if (howls.current.has(soundId)) return howls.current.get(soundId)!;
 
@@ -92,8 +130,9 @@ export function useAudioEngine(): AudioEngine {
 
   const play = useCallback((soundId: string, url: string, volume: number) => {
     const h = getOrCreate(soundId, url, volume);
+    ensureAnalyser();
     if (!h.playing()) h.play();
-  }, [getOrCreate]);
+  }, [ensureAnalyser, getOrCreate]);
 
   const pause  = useCallback((soundId: string) => { howls.current.get(soundId)?.pause(); }, []);
 
@@ -148,6 +187,6 @@ export function useAudioEngine(): AudioEngine {
   return {
     play, pause, stop, stopAll, pauseAll, resumeAll,
     setVolume, setMute, setMasterVolume, isPlaying,
-    syncMediaSession, setMediaSessionState,
+    syncMediaSession, setMediaSessionState, getAnalyser: ensureAnalyser,
   };
 }
