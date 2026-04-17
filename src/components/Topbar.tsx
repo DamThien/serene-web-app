@@ -39,17 +39,17 @@ export const Topbar: React.FC = () => {
 
   return (
     <>
-      <header className="topbar flex items-center justify-between border-b border-[var(--line)] bg-[var(--ink)] flex-shrink-0 z-20 relative">
-        <span className="font-['Instrument_Serif'] italic text-[24px] text-[var(--bright)] tracking-tight">
+      <header className="topbar flex items-center gap-3 border-b border-[var(--line)] bg-[var(--ink)] flex-shrink-0 z-20 relative">
+        <span className="font-['Instrument_Serif'] italic text-[22px] sm:text-[24px] text-[var(--bright)] tracking-tight flex-shrink-0">
           serene
         </span>
 
-        <nav className="flex gap-1 bg-[var(--ink3)] rounded-xl p-[4px]">
+        <nav className="flex gap-1 bg-[var(--ink3)] rounded-xl p-[4px] min-w-0 flex-1">
           {(['studio', 'feed'] as const).map((item) => (
             <button
               key={item}
               onClick={() => setPage(item)}
-              className={`text-sm font-medium px-5 py-2 rounded-lg capitalize transition-all duration-150 ${page === item ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+              className={`text-sm font-medium px-3 sm:px-5 py-2 rounded-lg capitalize transition-all duration-150 min-w-0 flex-1 sm:flex-none ${page === item ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
             >
               {item === 'studio' ? 'Studio' : 'Community'}
             </button>
@@ -57,64 +57,77 @@ export const Topbar: React.FC = () => {
           {user && (
             <button
               onClick={() => setPage('account')}
-              className={`text-sm font-medium px-4 py-2 rounded-lg transition-all duration-150 flex items-center gap-2 ${page === 'account' ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+              className={`text-sm font-medium px-3 sm:px-4 py-2 rounded-lg transition-all duration-150 flex items-center justify-center gap-2 min-w-0 flex-1 sm:flex-none ${page === 'account' ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
             >
               <UserRound size={14} />
-              Account
+              <span className="hidden sm:inline">Account</span>
             </button>
           )}
         </nav>
 
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--ink3)] text-xs text-[var(--mid)]">
-                <Crown size={13} className={premium ? 'text-[var(--gold)]' : 'text-[var(--mid)]'} />
-                <span>{premium ? `Premium: ${subscription?.plan}` : 'Free plan'}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <span className="text-sm text-[var(--mid)] hidden sm:inline">{user.name}</span>
-                <button
-                  onClick={() => setPage('account')}
-                  className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--sage2)] to-[var(--indigo)] flex items-center justify-center text-sm font-semibold text-white cursor-pointer"
-                  title="Open account"
-                >
-                  {user.image ? (
-                    <img
-                      src={user.image}
-                      alt={user.name}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    user.avatar
-                  )}
-                </button>
-                <button
-                  onClick={() => void handleLogout()}
-                  className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"
-                  title="Sign out"
-                >
-                  <LogOut size={14} />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
+        {user ? (
+          <>
+            <div className="flex md:hidden items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => openAuth('login')}
-                className="text-sm font-medium px-4 py-2 rounded-lg border border-[var(--line2)] text-[var(--soft)] hover:bg-[var(--ink3)] hover:text-[var(--bright)] transition-all hidden sm:flex"
+                onClick={() => void handleLogout()}
+                className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"
+                title="Sign out"
               >
-                Sign in
+                <LogOut size={14} />
               </button>
-              <button
-                onClick={() => openAuth('register')}
-                className="text-sm font-medium px-4 py-2 rounded-lg bg-[var(--sage2)] text-white hover:opacity-85 transition-opacity"
-              >
-                Sign up
-              </button>
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+              <>
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--ink3)] text-xs text-[var(--mid)]">
+                  <Crown size={13} className={premium ? 'text-[var(--gold)]' : 'text-[var(--mid)]'} />
+                  <span>{premium ? `Premium: ${subscription?.plan}` : 'Free plan'}</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm text-[var(--mid)] hidden sm:inline">{user.name}</span>
+                  <button
+                    onClick={() => setPage('account')}
+                    className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--sage2)] to-[var(--indigo)] flex items-center justify-center text-sm font-semibold text-white cursor-pointer"
+                    title="Open account"
+                  >
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      user.avatar
+                    )}
+                  </button>
+                  <button
+                    onClick={() => void handleLogout()}
+                    className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"
+                    title="Sign out"
+                  >
+                    <LogOut size={14} />
+                  </button>
+                </div>
+              </>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => openAuth('login')}
+              className="text-sm font-medium px-3 sm:px-4 py-2 rounded-lg border border-[var(--line2)] text-[var(--soft)] hover:bg-[var(--ink3)] hover:text-[var(--bright)] transition-all"
+            >
+              <span className="sm:hidden">Sign in</span>
+              <span className="hidden sm:inline">Sign in</span>
+            </button>
+            <button
+              onClick={() => openAuth('register')}
+              className="hidden sm:flex text-sm font-medium px-4 py-2 rounded-lg bg-[var(--sage2)] text-white hover:opacity-85 transition-opacity"
+            >
+              Sign up
+            </button>
+          </div>
+        )}
       </header>
 
       <AuthModal open={authOpen} mode={authMode} onClose={() => setAuthOpen(false)} />

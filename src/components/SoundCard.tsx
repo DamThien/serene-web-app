@@ -26,6 +26,7 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
     if (inMix) return;
 
     const url = isTrial && sound.previewUrl ? sound.previewUrl : sound.audioUrl;
+    const playback = isTrial ? null : sound.playback ?? null;
     const ok = addTrack({
       soundId: sound.id,
       volume: 0.7,
@@ -33,6 +34,7 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
       cat: sound.categoryname || 'Unknown',
       icon: sound.icon,
       url,
+      playback,
       isPremium: sound.isPremium,
       previewUrl: sound.previewUrl,
     });
@@ -43,7 +45,9 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
     }
 
     if (isPlaying) {
-      engine.play(sound.id, url, 0.7);
+      void engine.play(sound.id, url, 0.7, playback).catch((error) => {
+        toast(error instanceof Error ? error.message : 'Could not start protected audio');
+      });
     }
 
     toast(isTrial ? `${sound.title} added as 30-second trial` : `${sound.title} added`);

@@ -1,5 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { Howl, Howler } from 'howler';
+import { fetchProtectedAudioBlob, isPlaybackExpired } from '../utils/audioXor';
+import type { PlaybackDescriptor } from '../utils/audioXor';
 
 /**
  * useAudioEngine — Howler.js based, CORS-safe
@@ -25,7 +27,7 @@ export interface MediaSessionMeta {
 }
 
 export interface AudioEngine {
-  play:                (soundId: string, url: string, volume: number) => void;
+  play:                (soundId: string, url: string, volume: number, playback?: PlaybackDescriptor | null) => Promise<void>;
   pause:               (soundId: string) => void;
   stop:                (soundId: string) => void;
   stopAll:             () => void;
@@ -45,6 +47,9 @@ export interface AudioEngine {
 
 export function useAudioEngine(): AudioEngine {
   const howls = useRef<HowlMap>(new Map());
+  const objectUrls = useRef<Map<string, string>>(new Map());
+  const resolvedUrls = useRef<Map<string, { sourceUrl: string; token?: string; resolvedUrl: string }>>(new Map());
+  const pendingLoads = useRef<Map<string, Promise<string>>>(new Map());
   const msCallbacks = useRef<{
     onPlay:  () => void;
     onPause: () => void;
@@ -70,6 +75,58 @@ export function useAudioEngine(): AudioEngine {
     };
   }, []);
 
+  const releaseObjectUrl = useCallback((soundId: string) => {
+    const objectUrl = objectUrls.current.get(soundId);
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrls.current.delete(soundId);
+    }
+  }, []);
+
+  const resolvePlaybackUrl = useCallback(async (
+    soundId: string,
+    url: string,
+    playback?: PlaybackDescriptor | null,
+  ) => {
+    if (!playback || !playback.url || !playback.token) {
+      return url;
+    }
+
+    if (isPlaybackExpired(playback)) {
+      throw new Error('Playback token expired. Please reload the sound list and try again.');
+    }
+
+    const cached = resolvedUrls.current.get(soundId);
+    if (cached && cached.sourceUrl === playback.url && cached.token === playback.token) {
+      return cached.resolvedUrl;
+    }
+
+    if (pendingLoads.current.has(soundId)) {
+      return pendingLoads.current.get(soundId)!;
+    }
+
+    const loadPromise = (async () => {
+      releaseObjectUrl(soundId);
+      const blob = await fetchProtectedAudioBlob(playback);
+      const objectUrl = URL.createObjectURL(blob);
+      objectUrls.current.set(soundId, objectUrl);
+      resolvedUrls.current.set(soundId, {
+        sourceUrl: playback.url,
+        token: playback.token,
+        resolvedUrl: objectUrl,
+      });
+      return objectUrl;
+    })();
+
+    pendingLoads.current.set(soundId, loadPromise);
+
+    try {
+      return await loadPromise;
+    } finally {
+      pendingLoads.current.delete(soundId);
+    }
+  }, [releaseObjectUrl]);
+
   const getOrCreate = useCallback((soundId: string, url: string, volume: number): Howl => {
     if (howls.current.has(soundId)) return howls.current.get(soundId)!;
 
@@ -90,21 +147,35 @@ export function useAudioEngine(): AudioEngine {
     return h;
   }, []);
 
-  const play = useCallback((soundId: string, url: string, volume: number) => {
-    const h = getOrCreate(soundId, url, volume);
+  const play = useCallback(async (
+    soundId: string,
+    url: string,
+    volume: number,
+    playback?: PlaybackDescriptor | null,
+  ) => {
+    const resolvedUrl = await resolvePlaybackUrl(soundId, url, playback);
+    const h = getOrCreate(soundId, resolvedUrl, volume);
+    h.volume(volume);
     if (!h.playing()) h.play();
-  }, [getOrCreate]);
+  }, [getOrCreate, resolvePlaybackUrl]);
 
   const pause  = useCallback((soundId: string) => { howls.current.get(soundId)?.pause(); }, []);
 
   const stop = useCallback((soundId: string) => {
     const h = howls.current.get(soundId);
     if (h) { h.stop(); h.unload(); howls.current.delete(soundId); }
-  }, []);
+    releaseObjectUrl(soundId);
+    resolvedUrls.current.delete(soundId);
+    pendingLoads.current.delete(soundId);
+  }, [releaseObjectUrl]);
 
   const stopAll = useCallback(() => {
     howls.current.forEach(h => { h.stop(); h.unload(); });
     howls.current.clear();
+    objectUrls.current.forEach(url => URL.revokeObjectURL(url));
+    objectUrls.current.clear();
+    resolvedUrls.current.clear();
+    pendingLoads.current.clear();
   }, []);
 
   const pauseAll  = useCallback(() => { howls.current.forEach(h => h.pause()); }, []);

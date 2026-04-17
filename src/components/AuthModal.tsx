@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import {
   fetchFavoriteSounds,
+  fetchMe,
   fetchSubscription,
   fetchUserMixes,
   login,
@@ -144,7 +145,8 @@ export const AuthModal: React.FC<Props> = ({ open, mode = 'login', onClose }) =>
     setSubmitting(true);
 
     try {
-      const user = await userPromise;
+      const sessionUser = await userPromise;
+      const user = await fetchMe().catch(() => sessionUser);
       setUser(user);
       await hydrateAccount();
       toast(successMessage);

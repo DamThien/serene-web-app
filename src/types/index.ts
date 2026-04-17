@@ -1,9 +1,12 @@
+import type { PlaybackDescriptor } from '../utils/audioXor';
+
 export interface Sound {
   id: string;
   title: string;
   description: string;
   categoryname: string;
   audioUrl: string;
+  playback?: PlaybackDescriptor | null;
   previewUrl: string;
   duration: number;
   isLoopable: boolean;
@@ -28,6 +31,7 @@ export interface Track {
   cat: string;
   icon: string;
   url: string;
+  playback?: PlaybackDescriptor | null;
   isPremium?: boolean;
   previewUrl?: string;
 }

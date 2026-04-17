@@ -8,9 +8,9 @@ import type {
   SubscriptionPlan,
   User,
 } from '../types';
+import type { PlaybackDescriptor } from '../utils/audioXor';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || 'https://serene-api.shapeecloud.com/v1').replace(/\/$/, '');
-const LOCAL_AUDIO_BASE = import.meta.env.BASE_URL + 'mylodies_all_sound';
 const SESSION_KEY = 'serene.session';
 const DEVICE_KEY = 'serene.deviceId';
 
@@ -178,26 +178,38 @@ function buildQuery(params?: Record<string, unknown>) {
   return value ? `?${value}` : '';
 }
 
-export function localAudioUrl(audioUrl?: string, soundId?: string | number): string {
-  if (audioUrl) {
-    const match = audioUrl.match(/sound(\d+)\.mp3$/i);
-    if (match) {
-      return `${LOCAL_AUDIO_BASE}/sound${match[1]}.mp3`;
-    }
+function mapPlayback(item: any): PlaybackDescriptor | null {
+  if (!item?.playback?.url || !item?.playback?.token) {
+    return null;
   }
 
-  return `${LOCAL_AUDIO_BASE}/sound${soundId}.mp3`;
+  return {
+    url: item.playback.url,
+    token: item.playback.token,
+    expiresAt: item.playback.expiresAt ?? null,
+    transport: item.playback.transport,
+    encryption: item.playback.encryption
+      ? {
+          algorithm: item.playback.encryption.algorithm,
+          keySource: item.playback.encryption.keySource,
+          output: item.playback.encryption.output,
+        }
+      : undefined,
+  };
 }
 
 function mapSound(item: any): Sound {
   const id = String(item?._id ?? item?.id ?? '');
+  const playback = mapPlayback(item);
+
   return {
     id,
     title: item?.title ?? item?.name ?? '',
     categoryname: item?.category?.name ?? item?.categoryId?.name ?? 'Unknown',
     isFree: Boolean(item?.isFree),
     icon: item?.icon || 'melody',
-    audioUrl: localAudioUrl(item?.audioUrl, id),
+    audioUrl: item?.audioUrl ?? '',
+    playback,
     duration: item?.duration ?? 0,
     image: item?.image ?? '',
     description: item?.description || '',

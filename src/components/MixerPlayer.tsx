@@ -134,35 +134,53 @@ export const MixerPlayer: React.FC = () => {
     });
   }, [engine, tracks]);
 
-  const handlePlay = useCallback(() => {
+  const handlePlay = useCallback(async () => {
     if (tracks.length === 0) {
       toast('Add sounds to your mix first');
       return;
     }
 
-    tracks.forEach((track) => {
-      if (!track.muted) {
-        engine.play(track.soundId, track.url, track.volume);
-      }
-    });
+    try {
+      await Promise.all(
+        tracks
+          .filter((track) => !track.muted)
+          .map((track) => engine.play(track.soundId, track.url, track.volume, track.playback)),
+      );
 
-    startPlaybackClock();
-    setPlaying(true);
+      startPlaybackClock();
+      setPlaying(true);
 
-    engine.syncMediaSession(
-      {
-        title: mixName || 'Untitled Mix',
-        artist: tracks.map((track) => track.title).join(', '),
-      },
-      {
-        onPlay: handlePlay,
-        onPause: handlePause,
-        onStop: handleStop,
-      },
-    );
-  }, [engine, handlePause, handleStop, mixName, setPlaying, startPlaybackClock, tracks]);
+      engine.syncMediaSession(
+        {
+          title: mixName || 'Untitled Mix',
+          artist: tracks.map((track) => track.title).join(', '),
+        },
+        {
+          onPlay: () => {
+            engine.resumeAll();
+            startPlaybackClock();
+            setPlaying(true);
+          },
+          onPause: handlePause,
+          onStop: handleStop,
+        },
+      );
+    } catch (error) {
+      engine.stopAll();
+      resetPlaybackClock();
+      setPlaying(false);
+      toast(error instanceof Error ? error.message : 'Could not start protected audio');
+    }
+  }, [engine, handlePause, handleStop, mixName, resetPlaybackClock, setPlaying, startPlaybackClock, tracks]);
 
-  const handleTogglePlay = () => (isPlaying ? handlePause() : handlePlay());
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      handlePause();
+      return;
+    }
+
+    void handlePlay();
+  };
 
   const handleMasterVol = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);

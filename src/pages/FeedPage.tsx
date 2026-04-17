@@ -111,94 +111,105 @@ export const FeedPage: React.FC = () => {
   const isThisPlaying = (id: string) => feedPlayingId === id && isPlaying;
 
   const handlePlay = useCallback(async (mix: Mix) => {
-    if (feedPlayingId === mix._id) {
-      if (isPlaying) {
-        engine.pauseAll();
-        pausePlaybackClock();
-        setPlaying(false);
-        engine.setMediaSessionState('paused');
-      } else {
-        engine.resumeAll();
-        startPlaybackClock();
-        setPlaying(true);
-        engine.setMediaSessionState('playing');
-      }
-      return;
-    }
-
-    engine.stopAll();
-    resetPlaybackClock();
-    setFeedPlayingId(mix._id);
-
-    const sounds = soundsCacheRef.current;
-    const newTracks = mix.tracks
-      .map(td => {
-        const soundId = resolveSoundId(td.soundId);
-        const sound = sounds.find(x => String(x.id) === soundId);
-        const url = sound?.audioUrl ?? '';
-
-        return {
-          soundId,
-          volume: td.volume,
-          loop: true,
-          muted: false,
-          solo: false,
-          title: sound?.title ?? `Sound ${soundId}`,
-          cat: sound?.categoryname ?? 'Unknown',
-          icon: sound?.icon ?? 'music',
-          url,
-        };
-      })
-      .filter(track => track.soundId && track.url);
-
-    loadTracks(newTracks);
-    setMixName(mix.name);
-    setMixDesc(mix.description ?? '');
-    setPublic(Boolean(mix.isPublic && mix.isOwn));
-    setSelectedSilentFrequencies(mix.silentFrequencies ?? []);
-    setSelectedFrequencyLayer(mix.frequencyLayer ?? null);
-    setActiveMixContext(mix.isOwn ? mix._id : null, Boolean(mix.isOwn));
-    setPlaying(false);
-
-    newTracks.forEach(track => engine.play(track.soundId, track.url, track.volume));
-    startPlaybackClock();
-    setPlaying(true);
-
-    engine.syncMediaSession(
-      { title: mix.name, artist: mix.user ?? 'Serene Community' },
-      {
-        onPlay: () => {
-          engine.resumeAll();
-          startPlaybackClock();
-          setPlaying(true);
-        },
-        onPause: () => {
+    try {
+      if (feedPlayingId === mix._id) {
+        if (isPlaying) {
           engine.pauseAll();
           pausePlaybackClock();
           setPlaying(false);
-        },
-        onStop: () => {
-          engine.stopAll();
-          resetPlaybackClock();
-          setPlaying(false);
-          setFeedPlayingId('');
-        },
-      },
-    );
-
-    const lastLoggedAt = playLogRef.current.get(mix._id) ?? 0;
-    const shouldLogPlay = !mix.isOwn && Date.now() - lastLoggedAt > 30_000;
-
-    if (shouldLogPlay) {
-      try {
-        await logMixPlay(mix._id);
-        playLogRef.current.set(mix._id, Date.now());
-      } catch {
-        // non-critical
+          engine.setMediaSessionState('paused');
+        } else {
+          engine.resumeAll();
+          startPlaybackClock();
+          setPlaying(true);
+          engine.setMediaSessionState('playing');
+        }
+        return;
       }
-    }
 
-    toast(`Now playing: ${mix.name}`);
+      engine.stopAll();
+      resetPlaybackClock();
+      setFeedPlayingId(mix._id);
+
+      const sounds = soundsCacheRef.current;
+      const newTracks = mix.tracks
+        .map(td => {
+          const soundId = resolveSoundId(td.soundId);
+          const sound = sounds.find(x => String(x.id) === soundId);
+          const url = sound?.audioUrl ?? '';
+
+          return {
+            soundId,
+            volume: td.volume,
+            loop: true,
+            muted: false,
+            solo: false,
+            title: sound?.title ?? `Sound ${soundId}`,
+            cat: sound?.categoryname ?? 'Unknown',
+            icon: sound?.icon ?? 'music',
+            url,
+            playback: sound?.playback ?? null,
+          };
+        })
+        .filter(track => track.soundId && track.url);
+
+      loadTracks(newTracks);
+      setMixName(mix.name);
+      setMixDesc(mix.description ?? '');
+      setPublic(Boolean(mix.isPublic && mix.isOwn));
+      setSelectedSilentFrequencies(mix.silentFrequencies ?? []);
+      setSelectedFrequencyLayer(mix.frequencyLayer ?? null);
+      setActiveMixContext(mix.isOwn ? mix._id : null, Boolean(mix.isOwn));
+      setPlaying(false);
+
+      await Promise.all(
+        newTracks.map((track) => engine.play(track.soundId, track.url, track.volume, track.playback)),
+      );
+      startPlaybackClock();
+      setPlaying(true);
+
+      engine.syncMediaSession(
+        { title: mix.name, artist: mix.user ?? 'Serene Community' },
+        {
+          onPlay: () => {
+            engine.resumeAll();
+            startPlaybackClock();
+            setPlaying(true);
+          },
+          onPause: () => {
+            engine.pauseAll();
+            pausePlaybackClock();
+            setPlaying(false);
+          },
+          onStop: () => {
+            engine.stopAll();
+            resetPlaybackClock();
+            setPlaying(false);
+            setFeedPlayingId('');
+          },
+        },
+      );
+
+      const lastLoggedAt = playLogRef.current.get(mix._id) ?? 0;
+      const shouldLogPlay = !mix.isOwn && Date.now() - lastLoggedAt > 30_000;
+
+      if (shouldLogPlay) {
+        try {
+          await logMixPlay(mix._id);
+          playLogRef.current.set(mix._id, Date.now());
+        } catch {
+          // non-critical
+        }
+      }
+
+      toast(`Now playing: ${mix.name}`);
+    } catch (error) {
+      engine.stopAll();
+      resetPlaybackClock();
+      setPlaying(false);
+      setFeedPlayingId(null);
+      toast(error instanceof Error ? error.message : 'Could not start protected audio');
+    }
   }, [feedPlayingId, isPlaying, engine, pausePlaybackClock, resetPlaybackClock, setFeedPlayingId, loadTracks, setMixName, setMixDesc, setPublic, setSelectedSilentFrequencies, setSelectedFrequencyLayer, setActiveMixContext, setPlaying, startPlaybackClock]);
 
   const handleOpenInStudio = (mix: Mix) => {
