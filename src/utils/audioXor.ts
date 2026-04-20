@@ -39,6 +39,11 @@ export async function fetchProtectedAudioBlob(
     },
   });
 
+  // fetchProtectedAudioBlob
+  if (!response.ok || response.status === 204) {
+    throw new Error(`Protected audio request failed: ${response.status}`);
+  }
+
   if (!response.ok) {
     throw new Error(`Protected audio request failed: ${response.status}`);
   }
