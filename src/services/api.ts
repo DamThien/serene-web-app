@@ -8,7 +8,7 @@ import type {
   SubscriptionPlan,
   User,
 } from '../types';
-import type { PlaybackDescriptor } from '../utils/audioXor';
+import type { PlaybackDescriptor } from '../utils/audioAes';
 
 const API_BASE = (import.meta.env.VITE_API_BASE || 'https://serene-api.shapeecloud.com/v1').replace(/\/$/, '');
 const SESSION_KEY = 'serene.session';
@@ -186,6 +186,7 @@ function mapPlayback(item: any): PlaybackDescriptor | null {
   return {
     url: item.playback.url,
     token: item.playback.token,
+    ivBase64: item.playback.ivBase64 ?? '',
     expiresAt: item.playback.expiresAt ?? null,
     transport: item.playback.transport,
     encryption: item.playback.encryption
@@ -541,6 +542,15 @@ export async function fetchSounds(params?: {
 
   const data = await apiFetch<ApiResponse<any[]>>(`/sound${query}`);
   return (data.data || []).map(mapSound);
+}
+
+/**
+ * Fetch a single sound by ID — used to refresh an expired playback token
+ * without reloading the entire sound list.
+ */
+export async function fetchSoundById(id: string): Promise<Sound> {
+  const data = await apiFetch<ApiResponse<any>>(`/sound/${id}`);
+  return mapSound(data.data);
 }
 
 export async function fetchPublicMixes(): Promise<Mix[]> {

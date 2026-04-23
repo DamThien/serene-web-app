@@ -1,7 +1,8 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { Howl, Howler } from 'howler';
-import { fetchProtectedAudioBlob, isPlaybackExpired } from '../utils/audioXor';
-import type { PlaybackDescriptor } from '../utils/audioXor';
+import { fetchProtectedAudioBlob, isPlaybackExpired } from '../utils/audioAes';
+import { fetchSoundById } from '../services/api';
+import type { PlaybackDescriptor } from '../utils/audioAes';
 
 /**
  * useAudioEngine — Howler.js based, CORS-safe
@@ -46,10 +47,14 @@ export interface AudioEngine {
 }
 
 export function useAudioEngine(): AudioEngine {
-  const howls = useRef<HowlMap>(new Map());
-  const objectUrls = useRef<Map<string, string>>(new Map());
-  const resolvedUrls = useRef<Map<string, { sourceUrl: string; token?: string; resolvedUrl: string }>>(new Map());
+  const howls        = useRef<HowlMap>(new Map());
+  const objectUrls   = useRef<Map<string, string>>(new Map());
+  const resolvedUrls = useRef<Map<string, { sourceUrl: string; token?: string; resolvedUrl: string; format: string }>>(new Map());
   const pendingLoads = useRef<Map<string, Promise<string>>>(new Map());
+
+  // FIX: one AbortController per soundId — lets stop()/stopAll() cancel in-flight fetches
+  const fetchControllers = useRef<Map<string, AbortController>>(new Map());
+
   const msCallbacks = useRef<{
     onPlay:  () => void;
     onPause: () => void;
@@ -83,17 +88,38 @@ export function useAudioEngine(): AudioEngine {
     }
   }, []);
 
+  // FIX: abort any in-flight fetch for this soundId and clean up the controller
+  const abortPendingFetch = useCallback((soundId: string) => {
+    const controller = fetchControllers.current.get(soundId);
+    if (controller) {
+      controller.abort();
+      fetchControllers.current.delete(soundId);
+    }
+  }, []);
+
   const resolvePlaybackUrl = useCallback(async (
     soundId: string,
     url: string,
-    playback?: PlaybackDescriptor | null,
+    playbackArg?: PlaybackDescriptor | null,
   ) => {
+    let playback = playbackArg;
+
     if (!playback || !playback.url || !playback.token) {
       return url;
     }
 
+    // FIX: auto-refresh expired token instead of throwing
     if (isPlaybackExpired(playback)) {
-      throw new Error('Playback token expired. Please reload the sound list and try again.');
+      try {
+        const freshSound = await fetchSoundById(soundId);
+        if (freshSound.playback) {
+          playback = freshSound.playback;
+        } else {
+          throw new Error('Refreshed sound has no playback descriptor');
+        }
+      } catch {
+        throw new Error('Playback token expired and could not be refreshed. Please reload and try again.');
+      }
     }
 
     const cached = resolvedUrls.current.get(soundId);
@@ -105,15 +131,49 @@ export function useAudioEngine(): AudioEngine {
       return pendingLoads.current.get(soundId)!;
     }
 
+    // FIX: create a fresh AbortController for this fetch, abort any previous one first
+    abortPendingFetch(soundId);
+    const controller = new AbortController();
+    fetchControllers.current.set(soundId, controller);
+
     const loadPromise = (async () => {
       releaseObjectUrl(soundId);
-      const blob = await fetchProtectedAudioBlob(playback);
+
+      let blob: Blob;
+      try {
+        blob = await fetchProtectedAudioBlob(playback, { signal: controller.signal });
+      } catch (err: unknown) {
+        // FIX: AbortError means stop() was called — not a real error, just exit quietly
+        if (err instanceof Error && err.name === 'AbortError') {
+          throw err; // re-throw so the awaiter in play() also exits quietly
+        }
+        throw err;
+      } finally {
+        // Clean up controller once fetch settles (success, error, or abort)
+        fetchControllers.current.delete(soundId);
+      }
+
+      // FIX: check if this sound was stopped while fetch was in-flight
+      // If so, revoke immediately instead of leaking the object URL
+      if (controller.signal.aborted) {
+        URL.revokeObjectURL(URL.createObjectURL(blob));
+        throw new DOMException('Load cancelled', 'AbortError');
+      }
+
       const objectUrl = URL.createObjectURL(blob);
+      const mimeToFormat: Record<string, string> = {
+        'audio/mpeg': 'mp3', 'audio/mp3': 'mp3',
+        'audio/ogg': 'ogg', 'audio/wav': 'wav',
+        'audio/webm': 'webm', 'audio/aac': 'aac', 'audio/flac': 'flac',
+      };
+      const audioFormat = mimeToFormat[blob.type] ?? 'mp3';
+
       objectUrls.current.set(soundId, objectUrl);
       resolvedUrls.current.set(soundId, {
         sourceUrl: playback.url,
         token: playback.token,
         resolvedUrl: objectUrl,
+        format: audioFormat,
       });
       return objectUrl;
     })();
@@ -125,13 +185,18 @@ export function useAudioEngine(): AudioEngine {
     } finally {
       pendingLoads.current.delete(soundId);
     }
-  }, [releaseObjectUrl]);
+  }, [releaseObjectUrl, abortPendingFetch]);
 
-  const getOrCreate = useCallback((soundId: string, url: string, volume: number): Howl => {
+  const getOrCreate = useCallback((soundId: string, url: string, volume: number, format?: string): Howl => {
     if (howls.current.has(soundId)) return howls.current.get(soundId)!;
+
+    // Howler cannot infer format from blob: URLs (no file extension).
+    // Must pass format explicitly — default 'mp3' covers all ambient assets.
+    const resolvedFormat = format ? [format] : ['mp3'];
 
     const h = new Howl({
       src: [url],
+      format: resolvedFormat,
       loop:    true,
       volume,
       html5:   false,
@@ -153,23 +218,38 @@ export function useAudioEngine(): AudioEngine {
     volume: number,
     playback?: PlaybackDescriptor | null,
   ) => {
-    const resolvedUrl = await resolvePlaybackUrl(soundId, url, playback);
-    const h = getOrCreate(soundId, resolvedUrl, volume);
+    let resolvedUrl: string;
+    try {
+      resolvedUrl = await resolvePlaybackUrl(soundId, url, playback);
+    } catch (err: unknown) {
+      // FIX: AbortError from stop() during fetch — silently exit, no Howl to create
+      if (err instanceof Error && err.name === 'AbortError') return;
+      throw err;
+    }
+
+    const h = getOrCreate(soundId, resolvedUrl, volume, resolvedUrls.current.get(soundId)?.format);
     h.volume(volume);
     if (!h.playing()) h.play();
   }, [getOrCreate, resolvePlaybackUrl]);
 
-  const pause  = useCallback((soundId: string) => { howls.current.get(soundId)?.pause(); }, []);
+  const pause = useCallback((soundId: string) => { howls.current.get(soundId)?.pause(); }, []);
 
   const stop = useCallback((soundId: string) => {
+    // FIX: cancel in-flight fetch first — prevents memory leak from orphaned blob URLs
+    abortPendingFetch(soundId);
+
     const h = howls.current.get(soundId);
     if (h) { h.stop(); h.unload(); howls.current.delete(soundId); }
     releaseObjectUrl(soundId);
     resolvedUrls.current.delete(soundId);
     pendingLoads.current.delete(soundId);
-  }, [releaseObjectUrl]);
+  }, [releaseObjectUrl, abortPendingFetch]);
 
   const stopAll = useCallback(() => {
+    // FIX: abort all in-flight fetches before clearing state
+    fetchControllers.current.forEach(controller => controller.abort());
+    fetchControllers.current.clear();
+
     howls.current.forEach(h => { h.stop(); h.unload(); });
     howls.current.clear();
     objectUrls.current.forEach(url => URL.revokeObjectURL(url));
@@ -183,10 +263,10 @@ export function useAudioEngine(): AudioEngine {
     howls.current.forEach(h => { if (!h.playing()) h.play(); });
   }, []);
 
-  const setVolume      = useCallback((soundId: string, volume: number) => { howls.current.get(soundId)?.volume(volume); }, []);
-  const setMute        = useCallback((soundId: string, muted: boolean) => { howls.current.get(soundId)?.mute(muted); }, []);
+  const setVolume       = useCallback((soundId: string, volume: number) => { howls.current.get(soundId)?.volume(volume); }, []);
+  const setMute         = useCallback((soundId: string, muted: boolean) => { howls.current.get(soundId)?.mute(muted); }, []);
   const setMasterVolume = useCallback((v: number) => { Howler.volume(v); }, []);
-  const isPlaying      = useCallback((soundId: string): boolean => howls.current.get(soundId)?.playing() ?? false, []);
+  const isPlaying       = useCallback((soundId: string): boolean => howls.current.get(soundId)?.playing() ?? false, []);
 
   /**
    * syncMediaSession — call every time playback starts or mix changes.

@@ -1,4 +1,4 @@
-import type { PlaybackDescriptor } from '../utils/audioXor';
+import type { PlaybackDescriptor } from '../utils/audioAes';
 
 export interface Sound {
   id: string;
