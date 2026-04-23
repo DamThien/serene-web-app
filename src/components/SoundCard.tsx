@@ -79,9 +79,9 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
   return (
     <div
       onClick={handleAdd}
-      className={`sound-card group flex items-center gap-3 cursor-pointer border transition-all duration-150 select-none ${inMix ? 'bg-[var(--sage3)] border-[rgba(126,184,160,0.2)]' : 'border-transparent hover:bg-[var(--ink3)]'}`}
+      className={`sound-card group flex items-center gap-3 cursor-pointer border transition-all duration-150 select-none ${inMix ? 'bg-[var(--sage3)] border-[rgba(126,184,160,0.2)]' : 'border-transparent hover:bg-[var(--surface)]'}`}
     >
-      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 relative">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 relative shadow-[var(--card-shadow)]" style={{ background: 'var(--icon-shell)' }}>
         <img
           src={import.meta.env.BASE_URL + `sound_icons/${sound.icon}.svg`}
           alt={sound.icon}
@@ -100,7 +100,7 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
         <div className="text-xs text-[var(--mid)] mt-0.5">{sound.categoryname}</div>
       </div>
       <button
-        className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-150 ${isFavorited ? 'bg-[rgba(196,126,142,0.16)] border-[rgba(196,126,142,0.3)]' : 'border-[var(--line2)] hover:bg-[var(--ink4)]'}`}
+        className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-150 ${isFavorited ? 'bg-[rgba(196,126,142,0.16)] border-[rgba(196,126,142,0.3)]' : 'border-[var(--line2)] hover:bg-[var(--surface-elevated)]'}`}
         onClick={handleFavorite}
         title={isFavorited ? 'Remove favorite' : 'Save for later'}
       >

@@ -10,6 +10,8 @@ import {
 import { useMixerStore } from '../store/mixerStore';
 import type { Mix, Subscription, User } from '../types';
 import { toast } from '../components/Toast';
+import { MetricCard } from '../components/Account/MetricCard';
+import { InfoRow } from '../components/Account/InfoRow';
 
 export const AccountPage: React.FC = () => {
   const sessionUser = useMixerStore((state) => state.user);
@@ -78,7 +80,7 @@ export const AccountPage: React.FC = () => {
   if (!isAuthenticated()) {
     return (
       <div className="flex-1 overflow-y-auto px-7 py-7">
-        <div className="max-w-3xl mx-auto rounded-[28px] border border-[var(--line)] bg-[linear-gradient(135deg,rgba(24,24,31,.96),rgba(17,17,24,.98))] p-8">
+        <div className="max-w-3xl mx-auto rounded-[28px] border border-[var(--line)] bg-[var(--signin-card-bg)] p-8">
           <h1 className="font-['Instrument_Serif'] italic text-[34px] text-[var(--bright)] mb-2">
             Account
           </h1>
@@ -98,10 +100,10 @@ export const AccountPage: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto px-7 py-7">
       <div className="max-w-5xl mx-auto flex flex-col gap-6">
-        <section className="rounded-[32px] border border-[var(--line)] overflow-hidden bg-[linear-gradient(135deg,rgba(28,32,44,.96),rgba(12,13,20,.98))]">
+      <section className="rounded-[32px] border border-[var(--line)] overflow-hidden bg-[var(--account-card-bg)]">
           <div className="h-32 bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,.32),transparent_45%),radial-gradient(circle_at_top_right,rgba(123,127,196,.28),transparent_38%),linear-gradient(135deg,rgba(255,255,255,.03),rgba(255,255,255,0))]" />
           <div className="px-8 pb-8 -mt-11">
-            <div className="w-22 h-22 rounded-[26px] border border-[rgba(255,255,255,.12)] bg-[var(--ink3)] flex items-center justify-center text-[28px] font-semibold text-[var(--bright)] shadow-[0_18px_48px_rgba(0,0,0,.45)]">
+            <div className="w-22 h-22 rounded-[26px] border border-[var(--avatar-border)] bg-[var(--ink3)] flex items-center justify-center text-[28px] font-semibold text-[var(--bright)] shadow-[0_18px_48px_rgba(0,0,0,.45)]">
               {user?.image ? (
                 <img src={user.image} alt={user.name} className="w-full h-full object-cover rounded-[26px]" />
               ) : (
@@ -131,7 +133,7 @@ export const AccountPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="px-4 py-3 rounded-2xl border border-[rgba(201,169,110,.24)] bg-[rgba(201,169,110,.08)] min-w-[220px]">
+              <div className="px-4 py-3 rounded-2xl border border-[var(--membership-border)] bg-[var(--membership-bg)] min-w-[220px]">
                 <div className="flex items-center gap-2 text-[var(--gold)] text-xs uppercase tracking-[0.18em] font-semibold mb-2">
                   <Crown size={14} />
                   Membership
@@ -205,45 +207,3 @@ export const AccountPage: React.FC = () => {
     </div>
   );
 };
-
-const MetricCard: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  note: string;
-}> = ({ icon, label, value, note }) => (
-  <div className="rounded-[24px] border border-[var(--line)] bg-[var(--ink2)] p-5">
-    <div className="w-10 h-10 rounded-2xl bg-[var(--ink3)] border border-[var(--line)] flex items-center justify-center text-[var(--sage)] mb-4">
-      {icon}
-    </div>
-    <div className="text-xs uppercase tracking-[0.16em] text-[var(--mid)] font-semibold mb-2">
-      {label}
-    </div>
-    <div className="text-[28px] leading-none text-[var(--bright)] font-medium">
-      {value}
-    </div>
-    <div className="text-sm text-[var(--mid)] mt-2">
-      {note}
-    </div>
-  </div>
-);
-
-const InfoRow: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}> = ({ icon, label, value }) => (
-  <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--ink3)] px-4 py-3">
-    <div className="text-[var(--sage)]">
-      {icon}
-    </div>
-    <div className="min-w-0 flex-1">
-      <div className="text-xs uppercase tracking-[0.14em] text-[var(--mid)] font-semibold">
-        {label}
-      </div>
-      <div className="text-sm text-[var(--bright)] truncate mt-1">
-        {value}
-      </div>
-    </div>
-  </div>
-);

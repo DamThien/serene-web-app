@@ -305,9 +305,9 @@ export const MixerPlayer: React.FC = () => {
 
   return (
     <>
-      <div className="player-bar flex items-center px-5 gap-4 border-t border-[var(--line)] bg-[var(--ink2)] flex-shrink-0 relative z-10">
+      <div className="player-bar glass-panel flex items-center px-5 gap-4 border-t border-[var(--line)] flex-shrink-0 relative z-10">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="player-icon rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+          <div className="player-icon rounded-[18px] flex items-center justify-center flex-shrink-0 shadow-[var(--card-shadow)]" style={{ background: 'var(--icon-shell)' }}>
             <img
               src={import.meta.env.BASE_URL + `sound_icons/${nowIcon}.svg`}
               alt={nowIcon}
@@ -334,7 +334,7 @@ export const MixerPlayer: React.FC = () => {
           <button
             onClick={handleStop}
             title="Stop"
-            className="stop-btn rounded-lg border border-[var(--line2)] text-[var(--mid)] flex items-center justify-center transition-all duration-150 hover:bg-[var(--ink3)] hover:text-[var(--soft)]"
+            className="stop-btn rounded-lg border border-[var(--line2)] text-[var(--mid)] flex items-center justify-center transition-all duration-150 hover:bg-[var(--surface-elevated)] hover:text-[var(--soft)]"
           >
             <Square size={15} fill="currentColor" />
           </button>
@@ -376,13 +376,13 @@ export const MixerPlayer: React.FC = () => {
             {timerOpen && (
               <div
                 ref={timerDDRef}
-                className="absolute bottom-full right-0 mb-2 bg-[var(--ink3)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.5)] min-w-[190px] anim-fade z-50"
+                className="absolute bottom-full right-0 mb-2 bg-[var(--surface-strong)] border border-[var(--line2)] rounded-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,.24)] min-w-[190px] anim-fade z-50"
               >
                 {timerOptions.map((minutes) => (
                   <button
                     key={minutes}
                     onClick={() => handleSetSleepTimer(minutes)}
-                    className={`w-full text-left text-sm px-4 py-2.5 rounded-lg transition-colors ${sleepMins === minutes ? 'text-[var(--gold)]' : 'text-[var(--soft)] hover:bg-[var(--ink4)]'}`}
+                    className={`w-full text-left text-sm px-4 py-2.5 rounded-lg transition-colors ${sleepMins === minutes ? 'text-[var(--gold)]' : 'text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}
                   >
                     {minutes} minutes
                   </button>
@@ -398,7 +398,7 @@ export const MixerPlayer: React.FC = () => {
                       step={1}
                       value={customTimerMins}
                       onChange={(event) => setCustomTimerMins(event.target.value)}
-                      className="w-full bg-[var(--ink4)] border border-[var(--line)] rounded-lg px-3 py-2 text-sm text-[var(--bright)] outline-none"
+                      className="w-full bg-[var(--surface)] border border-[var(--line)] rounded-lg px-3 py-2 text-sm text-[var(--bright)] outline-none"
                       placeholder="5"
                     />
                     <button
@@ -424,7 +424,7 @@ export const MixerPlayer: React.FC = () => {
                       setTimerOpen(false);
                       toast('Timer cancelled');
                     }}
-                    className="w-full text-left text-sm px-4 py-2.5 rounded-lg text-[var(--blush)] hover:bg-[var(--ink4)] transition-colors border-t border-[var(--line)] mt-1 pt-2.5"
+                    className="w-full text-left text-sm px-4 py-2.5 rounded-lg text-[var(--blush)] hover:bg-[var(--surface-elevated)] transition-colors border-t border-[var(--line)] mt-1 pt-2.5"
                   >
                     Cancel timer
                   </button>
@@ -470,7 +470,7 @@ export const MixerPlayer: React.FC = () => {
 
       {confirmDeleteOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-6">
-          <div className="w-full max-w-sm rounded-3xl border border-[var(--line2)] bg-[var(--ink2)] p-6 shadow-[0_24px_64px_rgba(0,0,0,.55)]">
+          <div className="w-full max-w-sm rounded-3xl border border-[var(--line2)] bg-[var(--surface-strong)] p-6 shadow-[0_24px_64px_rgba(0,0,0,.32)]">
             <h3 className="font-['Instrument_Serif'] italic text-[26px] text-[var(--bright)] mb-2">
               Delete this mix?
             </h3>
@@ -481,7 +481,7 @@ export const MixerPlayer: React.FC = () => {
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
                 disabled={deleting}
-                className="px-4 py-2.5 rounded-xl border border-[var(--line)] text-[var(--soft)] hover:bg-[var(--ink3)] transition-all disabled:opacity-50"
+                className="px-4 py-2.5 rounded-xl border border-[var(--line)] text-[var(--soft)] hover:bg-[var(--surface-elevated)] transition-all disabled:opacity-50"
               >
                 Cancel
               </button>

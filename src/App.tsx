@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AudioEngineProvider } from './components/AudioEngineProvider';
 import { MixerPlayer } from './components/MixerPlayer';
 import { Topbar } from './components/Topbar';
@@ -18,6 +18,23 @@ import {
   isAuthenticated,
   restoreSession,
 } from './services/api';
+
+type ThemeMode = 'light' | 'dark';
+
+const THEME_STORAGE_KEY = 'serene-theme';
+
+const getInitialTheme = (): ThemeMode => {
+  if (typeof window === 'undefined') {
+    return 'dark';
+  }
+
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    return savedTheme;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
 
 const Pages: React.FC = () => {
   const page = useMixerStore((state) => state.page);
@@ -99,14 +116,32 @@ const AppBootstrap: React.FC = () => {
 
 const App: React.FC = () => (
   <AudioEngineProvider>
-    <div className="flex flex-col overflow-hidden bg-[var(--ink)] text-[var(--soft)]" style={{ height: '100dvh' }}>
+    <AppShell />
+  </AudioEngineProvider>
+);
+
+const AppShell: React.FC = () => {
+  const [theme, setTheme] = useState<ThemeMode>(() => getInitialTheme());
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  return (
+    <div className="app-shell flex flex-col overflow-hidden text-[var(--soft)]" style={{ height: '100dvh' }}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="hero-orb hero-orb-one" />
+        <div className="hero-orb hero-orb-two" />
+        <div className="hero-orb hero-orb-three" />
+      </div>
       <AppBootstrap />
-      <Topbar />
+      <Topbar theme={theme} onToggleTheme={() => setTheme((value) => (value === 'dark' ? 'light' : 'dark'))} />
       <Pages />
       <MixerPlayer />
       <ToastContainer />
     </div>
-  </AudioEngineProvider>
-);
+  );
+};
 
 export default App;

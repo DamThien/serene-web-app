@@ -1,5 +1,5 @@
 import React, { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Search, Sparkles, Waves, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Sparkles, Waves, X } from 'lucide-react';
 import {
   fetchCategories,
   fetchFrequencyLayers,
@@ -42,6 +42,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
   const [loading, setLoading] = useState(true);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [sfExpanded, setSfExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('sidebar-sf-expanded') !== 'false';
+    }
+    return true;
+  });
+  const [flExpanded, setFlExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('sidebar-fl-expanded') !== 'false';
+    }
+    return true;
+  });
 
   const selectedSilentFrequencies = useMixerStore((state) => state.selectedSilentFrequencies);
   const selectedFrequencyLayer = useMixerStore((state) => state.selectedFrequencyLayer);
@@ -149,22 +161,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     <>
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
 
-      <div className={`sidebar-panel flex flex-col border-r border-[var(--line)] overflow-hidden bg-[var(--ink)] ${mobileOpen ? 'open' : ''}`}>
-        <div className="px-5 pt-5 pb-3 flex-shrink-0 border-b border-[var(--line)]">
+      <div className={`sidebar-panel flex flex-col border-r border-[var(--line)] overflow-hidden glass-panel ${mobileOpen ? 'open' : ''}`}>
+        <div className="px-5 pt-5 pb-3 flex-shrink-0 border-b border-[var(--line)] bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,0.14),transparent_36%)]">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--mid)]">
-              Sound Library
-            </p>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--mid)]">
+                Sound Library
+              </p>
+              <p className="text-xs text-[var(--dim)] mt-1">
+                Pick layers for sleep, focus, or reset.
+              </p>
+            </div>
             {onMobileClose && (
               <button
                 onClick={onMobileClose}
-                className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--line)] text-[var(--mid)] hover:text-[var(--soft)]"
+                className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--line)] text-[var(--mid)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]"
               >
                 <X size={15} />
               </button>
             )}
           </div>
-          <div className="flex items-center gap-2.5 bg-[var(--ink3)] border border-[var(--line)] rounded-xl px-3 py-2.5">
+          <div className="flex items-center gap-2.5 bg-[var(--surface)] border border-[var(--line)] rounded-[18px] px-3 py-2.5">
             <Search size={15} className="text-[var(--mid)] flex-shrink-0" />
             <input
               type="text"
@@ -176,12 +193,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
           </div>
         </div>
 
-        <div className="flex gap-2 px-4 py-3 overflow-x-auto flex-shrink-0 scrollbar-none">
+        <div className="flex gap-2.5 px-4 py-4 overflow-x-auto flex-shrink-0 scrollbar-none">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setCat(category.name)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full border whitespace-nowrap transition-all duration-150 flex-shrink-0 ${cat === category.name ? 'bg-[var(--sage3)] border-[var(--sage)] text-[var(--sage)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)]'}`}
+              className={`text-sm font-medium px-4 py-2 rounded-full border whitespace-nowrap transition-all duration-150 flex-shrink-0 ${cat === category.name ? 'bg-[var(--sage3)] border-[var(--sage)] text-[var(--sage)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface)]'}`}
             >
               {category.name}
             </button>
@@ -204,49 +221,94 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
           <span className="ml-auto text-xs text-[var(--dim)]">{filtered.length}</span>
         </div>
 
-        <div className="px-4 pb-3 flex-shrink-0 border-b border-[var(--line)] space-y-3">
+        <div className="px-4 pb-3 flex-shrink-0 border-b border-[var(--line)] space-y-4">
           <div>
-            <div className="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--mid)]">
-              <Sparkles size={13} />
-              <span>Silent Frequencies</span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto scrollbar-none">
-              {silentFrequencies.slice(0, 8).map((item) => {
-                const active = selectedSilentFrequencies.some((entry) => entry.id === item.id);
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleSilentFrequency(item)}
-                    className={`px-3 py-2 rounded-xl border text-left min-w-[140px] transition-all ${active ? 'border-[var(--sage)] bg-[var(--sage3)] text-[var(--sage)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)]'}`}
-                  >
-                    <div className="text-xs font-medium truncate">{item.title}</div>
-                    <div className="text-[11px] opacity-80 truncate">{item.subtitle || item.category}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              onClick={() => {
+                const next = !sfExpanded;
+                setSfExpanded(next);
+                window.localStorage.setItem('sidebar-sf-expanded', String(next));
+              }}
+              className="flex items-center justify-between gap-2 w-full text-xs font-semibold uppercase tracking-widest text-[var(--mid)] hover:text-[var(--soft)] transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles size={13} />
+                <span>Silent Frequencies</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-[var(--dim)] normal-case tracking-normal">
+                  Up to 2
+                </span>
+                {sfExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </div>
+            </button>
+            {sfExpanded && (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-2">
+                {silentFrequencies.slice(0, 8).map((item) => {
+                  const active = selectedSilentFrequencies.some((entry) => entry.id === item.id);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSilentFrequency(item)}
+                      className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--sage)] bg-[var(--sage3)] text-[var(--sage)] shadow-[0_12px_24px_rgba(126,184,160,0.12)]' : 'border-[var(--line)] bg-[var(--surface)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{item.title}</div>
+                          <div className="text-[11px] opacity-80 leading-relaxed mt-1 line-clamp-2">
+                            {item.subtitle || item.category}
+                          </div>
+                        </div>
+                        {item.isPremium && (
+                          <span className="text-[10px] px-2 py-1 rounded-full border border-[rgba(214,178,74,0.25)] text-[var(--gold)] bg-[rgba(214,178,74,0.1)] flex-shrink-0">
+                            Pro
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--mid)]">
-              <Waves size={13} />
-              <span>Frequency Layer</span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto scrollbar-none">
-              {frequencyLayers.slice(0, 8).map((item) => {
-                const active = selectedFrequencyLayer?.id === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleFrequencyLayer(item)}
-                    className={`px-3 py-2 rounded-xl border text-left min-w-[120px] transition-all ${active ? 'border-[var(--gold)] bg-[rgba(214,178,74,0.12)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)]'}`}
-                  >
-                    <div className="text-xs font-medium">{item.hz} Hz</div>
-                    <div className="text-[11px] opacity-80 truncate">{item.title}</div>
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              onClick={() => {
+                const next = !flExpanded;
+                setFlExpanded(next);
+                window.localStorage.setItem('sidebar-fl-expanded', String(next));
+              }}
+              className="flex items-center justify-between gap-2 w-full text-xs font-semibold uppercase tracking-widest text-[var(--mid)] hover:text-[var(--soft)] transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Waves size={13} />
+                <span>Frequency Layer</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-[var(--dim)] normal-case tracking-normal">
+                  Pick 1
+                </span>
+                {flExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </div>
+            </button>
+            {flExpanded && (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mt-2">
+                {frequencyLayers.slice(0, 8).map((item) => {
+                  const active = selectedFrequencyLayer?.id === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleFrequencyLayer(item)}
+                      className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--gold)] bg-[rgba(214,178,74,0.12)] text-[var(--gold)] shadow-[0_12px_24px_rgba(214,178,74,0.10)]' : 'border-[var(--line)] bg-[var(--surface)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}
+                    >
+                      <div className="text-sm font-medium">{item.hz} Hz</div>
+                      <div className="text-[11px] opacity-80 leading-relaxed mt-1 line-clamp-2">{item.title}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

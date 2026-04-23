@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Crown, LogOut, UserRound } from 'lucide-react';
+import { Crown, LogOut, MoonStar, Sparkles, SunMedium, UserRound } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import { logout } from '../services/api';
 import { AuthModal } from './AuthModal';
 import { toast } from './Toast';
 
-export const Topbar: React.FC = () => {
+interface TopbarProps {
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
+
+export const Topbar: React.FC<TopbarProps> = ({ theme, onToggleTheme }) => {
   const page = useMixerStore((state) => state.page);
   const setPage = useMixerStore((state) => state.setPage);
   const user = useMixerStore((state) => state.user);
@@ -39,25 +44,35 @@ export const Topbar: React.FC = () => {
 
   return (
     <>
-      <header className="topbar flex items-center gap-3 border-b border-[var(--line)] bg-[var(--ink)] flex-shrink-0 z-20 relative">
-        <span className="font-['Instrument_Serif'] italic text-[22px] sm:text-[24px] text-[var(--bright)] tracking-tight flex-shrink-0">
-          serene
-        </span>
+      <header className="topbar flex items-center gap-3 border-b border-[var(--line)] glass-panel flex-shrink-0 z-20 relative">
+        <div className="min-w-0 flex-1 flex items-center gap-3">
+          <div className="hidden sm:flex w-11 h-11 rounded-[18px] items-center justify-center border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sage)] shadow-[var(--card-shadow)]">
+            <Sparkles size={16} />
+          </div>
+          <div className="min-w-0">
+            <div className="font-['Instrument_Serif'] italic text-[24px] sm:text-[28px] text-[var(--bright)] tracking-tight leading-none">
+              serene
+            </div>
+            <div className="hidden md:block text-[11px] uppercase tracking-[0.24em] text-[var(--mid)] mt-1">
+              Soft Focus Sound Studio
+            </div>
+          </div>
+        </div>
 
-        <nav className="flex gap-1 bg-[var(--ink3)] rounded-xl p-[4px] min-w-0 flex-1">
+        <nav className="flex gap-1.5 bg-[var(--surface)] rounded-[18px] p-[5px] min-w-0 border border-[var(--line)] shadow-[var(--card-shadow)]">
           {(['studio', 'feed'] as const).map((item) => (
             <button
               key={item}
               onClick={() => setPage(item)}
-              className={`text-sm font-medium px-3 sm:px-5 py-2 rounded-lg capitalize transition-all duration-150 min-w-0 flex-1 sm:flex-none ${page === item ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+              className={`text-sm font-medium px-3 sm:px-5 py-2.5 rounded-[14px] capitalize transition-all duration-200 min-w-0 flex items-center justify-center ${page === item ? 'bg-[var(--surface-strong)] text-[var(--bright)] shadow-[0_10px_24px_rgba(0,0,0,0.08)]' : 'text-[var(--mid)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}
             >
-              {item === 'studio' ? 'Studio' : 'Community'}
+              {item === 'studio' ? 'Studio' : 'Discover'}
             </button>
           ))}
           {user && (
             <button
               onClick={() => setPage('account')}
-              className={`text-sm font-medium px-3 sm:px-4 py-2 rounded-lg transition-all duration-150 flex items-center justify-center gap-2 min-w-0 flex-1 sm:flex-none ${page === 'account' ? 'bg-[var(--ink4)] text-[var(--bright)]' : 'text-[var(--mid)] hover:text-[var(--soft)]'}`}
+              className={`text-sm font-medium px-3 sm:px-4 py-2.5 rounded-[14px] transition-all duration-200 flex items-center justify-center gap-2 min-w-0 ${page === 'account' ? 'bg-[var(--surface-strong)] text-[var(--bright)] shadow-[0_10px_24px_rgba(0,0,0,0.08)]' : 'text-[var(--mid)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}
             >
               <UserRound size={14} />
               <span className="hidden sm:inline">Account</span>
@@ -65,12 +80,20 @@ export const Topbar: React.FC = () => {
           )}
         </nav>
 
+        <button
+          onClick={onToggleTheme}
+          className="w-11 h-11 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--soft)] hover:bg-[var(--surface-elevated)] transition-all duration-200 flex items-center justify-center shadow-[var(--card-shadow)] flex-shrink-0"
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <SunMedium size={17} /> : <MoonStar size={17} />}
+        </button>
+
         {user ? (
           <>
             <div className="flex md:hidden items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => void handleLogout()}
-                className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"
+                className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--surface-elevated)] transition-all flex items-center justify-center"
                 title="Sign out"
               >
                 <LogOut size={14} />
@@ -79,7 +102,7 @@ export const Topbar: React.FC = () => {
 
             <div className="hidden md:flex items-center gap-3 flex-shrink-0">
               <>
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--ink3)] text-xs text-[var(--mid)]">
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] text-xs text-[var(--mid)]">
                   <Crown size={13} className={premium ? 'text-[var(--gold)]' : 'text-[var(--mid)]'} />
                   <span>{premium ? `Premium: ${subscription?.plan}` : 'Free plan'}</span>
                 </div>
@@ -102,7 +125,7 @@ export const Topbar: React.FC = () => {
                   </button>
                   <button
                     onClick={() => void handleLogout()}
-                    className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--ink3)] transition-all flex items-center justify-center"
+                    className="w-9 h-9 rounded-full border border-[var(--line2)] text-[var(--mid)] hover:text-[var(--bright)] hover:bg-[var(--surface-elevated)] transition-all flex items-center justify-center"
                     title="Sign out"
                   >
                     <LogOut size={14} />
@@ -115,14 +138,14 @@ export const Topbar: React.FC = () => {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => openAuth('login')}
-              className="text-sm font-medium px-3 sm:px-4 py-2 rounded-lg border border-[var(--line2)] text-[var(--soft)] hover:bg-[var(--ink3)] hover:text-[var(--bright)] transition-all"
+              className="text-sm font-medium px-3 sm:px-4 py-2 rounded-xl border border-[var(--line2)] text-[var(--soft)] hover:bg-[var(--surface-elevated)] hover:text-[var(--bright)] transition-all"
             >
               <span className="sm:hidden">Sign in</span>
               <span className="hidden sm:inline">Sign in</span>
             </button>
             <button
               onClick={() => openAuth('register')}
-              className="hidden sm:flex text-sm font-medium px-4 py-2 rounded-lg bg-[var(--sage2)] text-white hover:opacity-85 transition-opacity"
+              className="hidden sm:flex text-sm font-medium px-4 py-2 rounded-xl bg-[var(--sage2)] text-white hover:opacity-85 transition-opacity"
             >
               Sign up
             </button>

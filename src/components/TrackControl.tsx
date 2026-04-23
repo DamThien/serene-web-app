@@ -29,7 +29,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
 
   const handleSolo = useCallback(() => {
     toggleSolo(track.soundId);
-  }, [track.soundId, track.solo, toggleSolo]);
+  }, [track.soundId, toggleSolo]);
 
   const handleRemove = useCallback(() => {
     engine.stop(track.soundId);
@@ -39,7 +39,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
   return (
     <div
       className={`
-        track-card bg-[var(--ink3)] border border-[var(--line)] anim-slide
+        track-card soft-panel anim-slide
         transition-all duration-150
         ${track.solo  ? 'border-[var(--gold)]' : ''}
         ${dimmed      ? 'opacity-40' : ''}
@@ -48,7 +48,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
     >
       {/* Header row */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-[var(--card-shadow)]" style={{ background: 'var(--icon-shell)' }}>
           <img
             src={import.meta.env.BASE_URL + `sound_icons/${track.icon}.svg`}
             alt={track.icon}
