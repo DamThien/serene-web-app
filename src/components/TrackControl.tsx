@@ -56,7 +56,14 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-[var(--bright)] truncate">{track.title}</div>
+          <div className="flex items-center gap-1.5">
+            <div className="text-sm font-medium text-[var(--bright)] truncate">{track.title}</div>
+            {track.isPremium === true && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(214,178,74,0.14)] text-[var(--gold)] border border-[rgba(214,178,74,0.25)]">
+                Premium
+              </span>
+            )}
+          </div>
           <div className="text-xs text-[var(--mid)] mt-0.5">{track.cat}</div>
         </div>
         <div className="flex gap-2">

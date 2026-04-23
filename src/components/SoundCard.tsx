@@ -20,13 +20,13 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
   const engine = useAudioEngineContext();
 
   const isFavorited = favoriteSoundIds.includes(sound.id);
-  const isTrial = sound.isPremium && !premiumUnlocked;
+  const isTrial = !sound.isFree && !premiumUnlocked;
 
   const handleAdd = () => {
     if (inMix) return;
-
+    
     const url = isTrial && sound.previewUrl ? sound.previewUrl : sound.audioUrl;
-    const playback = isTrial ? null : sound.playback ?? null;
+    const playback = sound.playback ?? null;
     const ok = addTrack({
       soundId: sound.id,
       volume: 0.7,
@@ -35,21 +35,21 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
       icon: sound.icon,
       url,
       playback,
-      isPremium: sound.isPremium,
+      isPremium: !sound.isFree,
       previewUrl: sound.previewUrl,
     });
-
+    
     if (!ok) {
       toast('Max 6 tracks per mix');
       return;
     }
-
+    
     if (isPlaying) {
       void engine.play(sound.id, url, 0.7, playback).catch((error) => {
         toast(error instanceof Error ? error.message : 'Could not start protected audio');
       });
     }
-
+    
     toast(isTrial ? `${sound.title} added as 30-second trial` : `${sound.title} added`);
   };
 

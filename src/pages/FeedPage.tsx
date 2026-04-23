@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef, useDeferredValue } from 'react';
-import { Clock3, Play, Pause, Search, Sparkles, Users, Waves } from 'lucide-react';
+import { Clock3, Search, Sparkles, Users, Waves } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import { useAudioEngineContext } from '../components/AudioEngineProvider';
 import { fetchSounds, fetchPublicMixes, logMixPlay } from '../services/api';
