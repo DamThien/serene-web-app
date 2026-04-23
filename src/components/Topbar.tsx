@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Crown, LogOut, MoonStar, Sparkles, SunMedium, UserRound } from 'lucide-react';
+import { Crown, LogOut, MoonStar, SunMedium, UserRound } from 'lucide-react';
 import { useMixerStore } from '../store/mixerStore';
 import { logout } from '../services/api';
 import { AuthModal } from './AuthModal';
 import { toast } from './Toast';
+import sereneLogo from '../assets/serene_logo.jpg';
 
 interface TopbarProps {
   theme: 'light' | 'dark';
@@ -46,11 +47,14 @@ export const Topbar: React.FC<TopbarProps> = ({ theme, onToggleTheme }) => {
     <>
       <header className="topbar flex items-center gap-3 border-b border-[var(--line)] glass-panel flex-shrink-0 z-20 relative">
         <div className="min-w-0 flex-1 flex items-center gap-3">
-          <div className="hidden sm:flex w-11 h-11 rounded-[18px] items-center justify-center border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sage)] shadow-[var(--card-shadow)]">
-            <Sparkles size={16} />
+          <div className="flex w-11 h-11 rounded-[18px] items-center justify-center border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sage)] shadow-[var(--card-shadow)] overflow-hidden">
+            <img
+              src={sereneLogo}
+              alt="Serene logo"
+            />
           </div>
           <div className="min-w-0">
-            <div className="font-['Instrument_Serif'] italic text-[24px] sm:text-[28px] text-[var(--bright)] tracking-tight leading-none">
+            <div className="font-['Instrument_Serif'] italic text-[24px] sm:text-[28px] text-[var(--bright)] tracking-tight leading-none hidden sm:block">
               serene
             </div>
             <div className="hidden md:block text-[11px] uppercase tracking-[0.24em] text-[var(--mid)] mt-1">
