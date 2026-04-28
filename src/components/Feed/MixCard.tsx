@@ -21,7 +21,7 @@ export const MixCard: React.FC<MixCardProps> = ({ mix, playing, onPlay, onOpenSt
       style={style}
       onClick={onPlay}
     >
-      <div className="absolute inset-x-0 top-0 h-[120px] opacity-80 bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,0.24),transparent_48%),radial-gradient(circle_at_top_right,rgba(123,127,196,0.2),transparent_38%)]" />
+      <div className="absolute inset-x-0 top-0 h-[120px] opacity-80 bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,0.24),transparent_48%),radial-gradient(circle_at_top_right,rgba(221,45,255,0.2),transparent_38%)]" />
 
       <div className="relative">
         <div className="flex items-start gap-4 mb-5">
@@ -32,7 +32,7 @@ export const MixCard: React.FC<MixCardProps> = ({ mix, playing, onPlay, onOpenSt
             <img
               src={import.meta.env.BASE_URL + `sound_icons/${mix.icon}.svg`}
               alt={mix.icon}
-              className="w-7 h-7"
+              className="w-7 h-7 sound-icon"
             />
           </div>
 

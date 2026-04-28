@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Crown, Globe, Lock, PanelLeft, Sparkles, Waves } from 'lucide-react';
-import { Sidebar } from '../components/Sidebar';
+import { Crown, Globe, Lock, Sparkles, Waves } from 'lucide-react';
+import { FrequenciesPanel } from '../components/FrequenciesPanel';
+import { SoundLibraryPanel } from '../components/SoundLibraryPanel';
 import { TrackControl } from '../components/TrackControl';
 import { useMixerStore } from '../store/mixerStore';
 
@@ -18,27 +19,34 @@ export const StudioPage: React.FC = () => {
   const setPublic = useMixerStore((state) => state.setPublic);
   const hasSolo = tracks.some((track) => track.solo);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [FrequenciesOpen, setFrequenciesOpen] = useState(false);
 
   const highlightPlan = subscriptionPlans.find((plan) => plan.isPopular) ?? subscriptionPlans[0];
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="studio-layout">
-        <Sidebar
-          mobileOpen={sidebarOpen}
-          onMobileClose={() => setSidebarOpen(false)}
+        <FrequenciesPanel
+          mobileOpen={FrequenciesOpen}
+          onMobileClose={() => setFrequenciesOpen(false)}
         />
-
         <div className="flex flex-col flex-1 overflow-hidden">
           <div className="px-4 pb-4 pt-4 sm:px-6 sm:pt-5 flex-shrink-0">
             <div className="soft-panel rounded-[30px] overflow-hidden">
-              <div className="px-5 py-5 sm:px-6 sm:py-6 border-b border-[var(--line)] bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,0.16),transparent_32%),radial-gradient(circle_at_top_right,rgba(123,127,196,0.14),transparent_26%)]">
+              <div className="px-5 py-5 sm:px-6 sm:py-6 border-b border-[var(--line)] bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,0.16),transparent_32%),radial-gradient(circle_at_top_right,rgba(221,45,255,0.14),transparent_26%)]">
                 <div className="flex items-center gap-3 mb-4">
+                  <button
+                    className="sidebar-toggle"
+                    onClick={() => setFrequenciesOpen((prev) => !prev)}
+                  >
+                    <Sparkles size={15} />
+                    {FrequenciesOpen ? 'Hide' : 'Show'}
+                  </button>
+
                   <button
                     className="sidebar-toggle"
                     onClick={() => setSidebarOpen(true)}
                   >
-                    <PanelLeft size={15} />
                     Sounds
                   </button>
 
@@ -93,8 +101,8 @@ export const StudioPage: React.FC = () => {
                     Calm studio layout
                   </span>
                   {hasSolo && (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border border-[rgba(214,178,74,0.28)] bg-[rgba(214,178,74,0.12)] text-[var(--gold)]">
-                      <span className="w-2 h-2 rounded-full bg-[var(--gold)]" />
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border border-[rgba(221,45,255,0.28)] bg-[rgba(221,45,255,0.12)] text-[var(--pink)]">
+                      <span className="w-2 h-2 rounded-full bg-[var(--pink)]" />
                       Solo monitoring active
                     </span>
                   )}
@@ -106,7 +114,7 @@ export const StudioPage: React.FC = () => {
               {selectedSilentFrequencies.map((item) => (
                 <span
                   key={item.id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border border-[rgba(126,184,160,0.25)] bg-[var(--sage3)] text-[var(--sage)]"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border border-[rgba(163,93,255,0.25)] bg-[var(--purple3)] text-[var(--purple)]"
                 >
                   <Sparkles size={10} />
                   {item.title}
@@ -114,7 +122,7 @@ export const StudioPage: React.FC = () => {
               ))}
   
               {selectedFrequencyLayer && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border border-[rgba(214,178,74,0.25)] bg-[rgba(214,178,74,0.12)] text-[var(--gold)]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] border border-[rgba(221,45,255,0.25)] bg-[rgba(221,45,255,0.12)] text-[var(--pink)]]">
                   <Waves size={10} />
                   {selectedFrequencyLayer.hz} Hz
                 </span>
@@ -154,6 +162,11 @@ export const StudioPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        <SoundLibraryPanel
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
+        />
       </div>
     </div>
   );

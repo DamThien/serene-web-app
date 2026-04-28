@@ -52,14 +52,14 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
           <img
             src={import.meta.env.BASE_URL + `sound_icons/${track.icon}.svg`}
             alt={track.icon}
-            className="w-7 h-7"
+            className="w-7 h-7 sound-icon"
           />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <div className="text-sm font-medium text-[var(--bright)] truncate">{track.title}</div>
             {track.isPremium === true && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(214,178,74,0.14)] text-[var(--gold)] border border-[rgba(214,178,74,0.25)]">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(221,45,255,0.14)] text-[var(--pink)] border border-[rgba(221,45,255,0.25)]">
                 Premium
               </span>
             )}
@@ -122,7 +122,7 @@ export const TrackControl: React.FC<Props> = ({ track, hasSolo }) => {
           min={0} max={1} step={0.01}
           value={track.volume}
           onChange={handleVolume}
-          style={{ background: `linear-gradient(to right, var(--sage) ${pct}%, var(--ink4) ${pct}%)` }}
+          style={{ background: `linear-gradient(to right, var(--purple) ${pct}%, var(--ink4) ${pct}%)` }}
         />
         <span className="text-xs text-[var(--mid)] min-w-[34px] text-right tabular-nums">
           {pct}%

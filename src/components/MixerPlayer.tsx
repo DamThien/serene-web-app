@@ -311,7 +311,7 @@ export const MixerPlayer: React.FC = () => {
             <img
               src={import.meta.env.BASE_URL + `sound_icons/${nowIcon}.svg`}
               alt={nowIcon}
-              className="w-8 h-8"
+              className="w-8 h-8 sound-icon"
             />
           </div>
           <div className="min-w-0 hidden sm:block">
@@ -434,7 +434,7 @@ export const MixerPlayer: React.FC = () => {
           </div>
 
           {!premiumUnlocked && tracks.some((track) => track.isPremium) && (
-            <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-[var(--gold)] border border-[rgba(214,178,74,0.25)] rounded-full px-3 py-1.5">
+            <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-[var(--pink)] border border-[rgba(221,45,255,0.25)] rounded-full px-3 py-1.5">
               <Crown size={12} />
               Trial locks after 30s
             </div>

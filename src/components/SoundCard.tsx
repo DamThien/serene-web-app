@@ -79,20 +79,20 @@ export const SoundCard: React.FC<Props> = React.memo(({ sound }) => {
   return (
     <div
       onClick={handleAdd}
-      className={`sound-card group flex items-center gap-3 cursor-pointer border transition-all duration-150 select-none ${inMix ? 'bg-[var(--sage3)] border-[rgba(126,184,160,0.2)]' : 'border-transparent hover:bg-[var(--surface)]'}`}
+      className={`sound-card group flex items-center gap-3 cursor-pointer border transition-all duration-150 select-none ${inMix ? 'bg-[var(--purple3)] border-[rgba(163,93,255,0.2)]' : 'border-transparent hover:bg-[var(--surface)]'}`}
     >
       <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 relative shadow-[var(--card-shadow)]" style={{ background: 'var(--icon-shell)' }}>
         <img
           src={import.meta.env.BASE_URL + `sound_icons/${sound.icon}.svg`}
           alt={sound.icon}
-          className="w-6 h-6"
+          className="w-6 h-6 sound-icon"
         />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-[var(--bright)] truncate flex items-center gap-2">
           <span className="truncate">{sound.title}</span>
           {isTrial && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(214,178,74,0.14)] text-[var(--gold)] border border-[rgba(214,178,74,0.25)]">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(221,45,255,0.14)] text-[var(--pink)] border border-[rgba(221,45,255,0.25)]">
               30s trial
             </span>
           )}

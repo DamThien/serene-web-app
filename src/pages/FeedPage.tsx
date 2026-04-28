@@ -40,9 +40,9 @@ const dedupeMixes = (ownMixes: Mix[], mixes: Mix[]) => {
 };
 
 const moodHighlights = [
-  { title: 'Deep Sleep', copy: 'Warm rain, soft drones, and low-light night textures.', accent: 'rgba(126,184,160,0.18)' },
-  { title: 'Focus Drift', copy: 'Sparse ambience that stays out of the way while you work.', accent: 'rgba(123,127,196,0.16)' },
-  { title: 'Morning Reset', copy: 'Airy birdsong and gentle motion to ease into the day.', accent: 'rgba(214,178,74,0.16)' },
+  { title: 'Deep Sleep', copy: 'Warm rain, soft drones, and low-light night textures.', accent: 'rgba(163,93,255,0.18)' },
+  { title: 'Focus Drift', copy: 'Sparse ambience that stays out of the way while you work.', accent: 'rgba(221,45,255,0.16)' },
+  { title: 'Morning Reset', copy: 'Airy birdsong and gentle motion to ease into the day.', accent: 'rgba(107,92,230,0.16)' },
 ];
 
 export const FeedPage: React.FC = () => {
@@ -239,7 +239,7 @@ export const FeedPage: React.FC = () => {
     <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <section className="soft-panel rounded-[34px] p-5 sm:p-7 overflow-hidden relative">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(123,127,196,0.12),transparent_32%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(221,45,255,0.12),transparent_32%)]" />
           <div className="relative grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
             <div className="space-y-5">
               <div className="flex items-center gap-2 flex-wrap">
@@ -329,13 +329,13 @@ export const FeedPage: React.FC = () => {
               Listening status
             </p>
             {feedPlayingId && playingMix ? (
-              <div className="rounded-[24px] border border-[rgba(126,184,160,0.25)] bg-[var(--sage3)] p-4 anim-fade">
+              <div className="rounded-[24px] border border-[rgba(163,93,255,0.25)] bg-[var(--purple3)] p-4 anim-fade">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-[18px] flex items-center justify-center flex-shrink-0 shadow-[var(--card-shadow)]" style={{ background: 'var(--icon-shell)' }}>
                     <img
                       src={import.meta.env.BASE_URL + `sound_icons/${playingMix.icon}.svg`}
                       alt={playingMix.icon}
-                      className="w-6 h-6"
+                      className="w-6 h-6 sound-icon"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -345,7 +345,7 @@ export const FeedPage: React.FC = () => {
                   </div>
                   <button
                     onClick={() => handleOpenInStudio(playingMix)}
-                    className="text-xs text-[var(--sage)] border border-[rgba(126,184,160,0.3)] px-3 py-2 rounded-xl hover:bg-[rgba(126,184,160,0.1)] transition-colors flex-shrink-0"
+                    className="text-xs text-[var(--purple)] border border-[rgba(163,93,255,0.3)] px-3 py-2 rounded-xl hover:bg-[rgba(163,93,255,0.1)] transition-colors flex-shrink-0"
                   >
                     Open Studio
                   </button>

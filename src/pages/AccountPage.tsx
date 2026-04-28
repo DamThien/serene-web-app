@@ -101,7 +101,7 @@ export const AccountPage: React.FC = () => {
     <div className="flex-1 overflow-y-auto px-7 py-7">
       <div className="max-w-5xl mx-auto flex flex-col gap-6">
       <section className="rounded-[32px] border border-[var(--line)] overflow-hidden bg-[var(--account-card-bg)]">
-          <div className="h-32 bg-[radial-gradient(circle_at_top_left,rgba(126,184,160,.32),transparent_45%),radial-gradient(circle_at_top_right,rgba(123,127,196,.28),transparent_38%),linear-gradient(135deg,rgba(255,255,255,.03),rgba(255,255,255,0))]" />
+          <div className="h-32 bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,.32),transparent_45%),radial-gradient(circle_at_top_right,rgba(221,45,255,.28),transparent_38%),linear-gradient(135deg,rgba(255,255,255,.03),rgba(255,255,255,0))]" />
           <div className="px-8 pb-8 -mt-11">
             <div className="w-22 h-22 rounded-[26px] border border-[var(--avatar-border)] bg-[var(--ink3)] flex items-center justify-center text-[28px] font-semibold text-[var(--bright)] shadow-[0_18px_48px_rgba(0,0,0,.45)]">
               {user?.image ? (
