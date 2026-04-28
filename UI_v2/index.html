@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serene UI v2</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <div>
+            <p class="eyebrow">Quiet space</p>
+            <h1>Serene</h1>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-item is-active" data-view="home">
+            <img src="../public/sound_icons/home_round.svg" alt="" />
+            <span>Home</span>
+          </button>
+          <button class="nav-item" data-view="composer">
+            <img src="../public/sound_icons/music_align.svg" alt="" />
+            <span>Composer</span>
+          </button>
+          <button class="nav-item" data-view="silence">
+            <img src="../public/sound_icons/quantum.svg" alt="" />
+            <span>Silence</span>
+          </button>
+          <button class="nav-item" data-view="stats">
+            <img src="../public/sound_icons/time.svg" alt="" />
+            <span>Stats</span>
+          </button>
+          <button class="nav-item" data-view="settings">
+            <img src="../public/sound_icons/setting.svg" alt="" />
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <section class="focus-card">
+          <div class="focus-art">
+            <img src="../public/sound_icons/moon.svg" alt="" />
+          </div>
+          <div>
+            <p class="eyebrow">Quick start</p>
+            <h2>Sleep Mode</h2>
+            <p>Ocean, rain, soft drone</p>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Web adaptation from mobile design</p>
+            <h2 id="view-title">Good Morning</h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-btn">Share mix</button>
+            <button class="primary-btn">Start session</button>
+          </div>
+        </header>
+
+        <section class="view is-active" data-view="home">
+          <div class="content-grid">
+            <div class="main-column">
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Welcome back</p>
+                    <h3>Quick Start</h3>
+                  </div>
+                </div>
+
+                <div class="mode-grid">
+                  <article class="mode-card gradient-sleep">
+                    <div class="mode-icon">
+                      <img src="../public/sound_icons/moon.svg" alt="" />
+                    </div>
+                    <div>
+                      <h4>Sleep Mode</h4>
+                      <p>Wind down and rest</p>
+                      <span>Ocean, Rain, Soft Drone</span>
+                    </div>
+                  </article>
+
+                  <article class="mode-card gradient-calm">
+                    <div class="mode-icon">
+                      <img src="../public/sound_icons/breathing.svg" alt="" />
+                    </div>
+                    <div>
+                      <h4>Calm Mode</h4>
+                      <p>Relax and breathe</p>
+                      <span>Forest, Birds, Stream</span>
+                    </div>
+                  </article>
+
+                  <article class="mode-card gradient-focus">
+                    <div class="mode-icon">
+                      <img src="../public/sound_icons/meditate.svg" alt="" />
+                    </div>
+                    <div>
+                      <h4>Focus Mode</h4>
+                      <p>Deep work</p>
+                      <span>Piano, White Noise, Stream</span>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Your library</p>
+                    <h3>Recent Sessions</h3>
+                  </div>
+                  <button class="chip-btn">View all</button>
+                </div>
+
+                <div class="session-list">
+                  <article class="session-item">
+                    <div class="session-icon">
+                      <img src="../public/sound_icons/wind.svg" alt="" />
+                    </div>
+                    <div class="session-copy">
+                      <h4>Rainy Night</h4>
+                      <p>Sleep</p>
+                    </div>
+                    <span>40 min</span>
+                    <time>Jan 15</time>
+                  </article>
+                  <article class="session-item">
+                    <div class="session-icon">
+                      <img src="../public/sound_icons/fire_solid.svg" alt="" />
+                    </div>
+                    <div class="session-copy">
+                      <h4>My Sleep River</h4>
+                      <p>Sleep</p>
+                    </div>
+                    <span>55 min</span>
+                    <time>Jan 16</time>
+                  </article>
+                  <article class="session-item">
+                    <div class="session-icon">
+                      <img src="../public/sound_icons/forest.svg" alt="" />
+                    </div>
+                    <div class="session-copy">
+                      <h4>Morning Forest</h4>
+                      <p>Calm</p>
+                    </div>
+                    <span>15 min</span>
+                    <time>Jan 17</time>
+                  </article>
+                  <article class="session-item">
+                    <div class="session-icon">
+                      <img src="../public/sound_icons/music.svg" alt="" />
+                    </div>
+                    <div class="session-copy">
+                      <h4>Focus Flow</h4>
+                      <p>Focus</p>
+                    </div>
+                    <span>30 min</span>
+                    <time>Jan 18</time>
+                  </article>
+                </div>
+              </section>
+            </div>
+
+            <aside class="rail">
+              <section class="panel player-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Now playing</p>
+                    <h3>Audible Sounds</h3>
+                  </div>
+                  <span class="status-tag">Breathing</span>
+                </div>
+
+                <div class="equalizer" aria-hidden="true">
+                  <span style="--bar: 54%"></span>
+                  <span style="--bar: 82%"></span>
+                  <span style="--bar: 68%"></span>
+                  <span style="--bar: 92%"></span>
+                  <span style="--bar: 61%"></span>
+                  <span style="--bar: 78%"></span>
+                  <span style="--bar: 48%"></span>
+                  <span style="--bar: 86%"></span>
+                  <span style="--bar: 58%"></span>
+                  <span style="--bar: 73%"></span>
+                  <span style="--bar: 95%"></span>
+                  <span style="--bar: 67%"></span>
+                </div>
+
+                <div class="track-list">
+                  <article class="track-card">
+                    <div class="track-meta">
+                      <div class="session-icon">
+                        <img src="../public/sound_icons/ocean.svg" alt="" />
+                      </div>
+                      <div>
+                        <h4>Ocean</h4>
+                        <p>Water</p>
+                      </div>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" />
+                  </article>
+                  <article class="track-card">
+                    <div class="track-meta">
+                      <div class="session-icon">
+                        <img src="../public/sound_icons/rain.svg" alt="" />
+                      </div>
+                      <div>
+                        <h4>Rain</h4>
+                        <p>Water</p>
+                      </div>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" />
+                  </article>
+                  <article class="track-card">
+                    <div class="track-meta">
+                      <div class="session-icon">
+                        <img src="../public/sound_icons/abstract.svg" alt="" />
+                      </div>
+                      <div>
+                        <h4>Soft Drone</h4>
+                        <p>Ambient</p>
+                      </div>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" />
+                  </article>
+                </div>
+
+                <div class="timer-card">
+                  <div class="section-head compact">
+                    <h4>Sleep Timer</h4>
+                    <span>45 min</span>
+                  </div>
+                  <div class="timer-options">
+                    <button>15m</button>
+                    <button>30m</button>
+                    <button class="is-active">45m</button>
+                    <button>60m</button>
+                  </div>
+                </div>
+
+                <button class="player-action">Pause</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" data-view="composer">
+          <div class="content-grid composer-layout">
+            <div class="main-column">
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Select sounds to build your mix</p>
+                    <h3>Suggested Mixes</h3>
+                  </div>
+                </div>
+                <div class="suggest-grid">
+                  <article class="suggest-card gradient-sleep">
+                    <h4>Deep Sleep</h4>
+                    <p>Ocean, Rain, Soft Drone</p>
+                  </article>
+                  <article class="suggest-card gradient-green">
+                    <h4>Forest Calm</h4>
+                    <p>Forest, Birds, Stream</p>
+                  </article>
+                  <article class="suggest-card gradient-calm">
+                    <h4>Focus Flow</h4>
+                    <p>Piano, White Noise, Stream</p>
+                  </article>
+                  <article class="suggest-card gradient-muted">
+                    <h4>Rainy Night</h4>
+                    <p>Rain, Wind, Crickets</p>
+                  </article>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Quick add sounds</p>
+                    <h3>Sound Library</h3>
+                  </div>
+                  <span class="status-tag">0/6 selected</span>
+                </div>
+                <div class="filter-row">
+                  <button class="filter-chip is-active">All</button>
+                  <button class="filter-chip">Water</button>
+                  <button class="filter-chip">Nature</button>
+                  <button class="filter-chip">Music</button>
+                  <button class="filter-chip">Ambient</button>
+                </div>
+                <div class="sound-grid">
+                  <article class="sound-card"><img src="../public/sound_icons/rain.svg" alt="" /><span>Rain</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/river.svg" alt="" /><span>Stream</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/ocean.svg" alt="" /><span>Ocean</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/fountain.svg" alt="" /><span>Waterfall</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/birds.svg" alt="" /><span>Birds</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/wind.svg" alt="" /><span>Wind</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/forest.svg" alt="" /><span>Forest</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/cicadas.svg" alt="" /><span>Crickets</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/flute.svg" alt="" /><span>Flute</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/piano.svg" alt="" /><span>Piano</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/melody.svg" alt="" /><span>Harp</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/bell.svg" alt="" /><span>Singing Bowl</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/whitenoise.svg" alt="" /><span>White Noise</span></article>
+                  <article class="sound-card"><img src="../public/sound_icons/brownnoise.svg" alt="" /><span>Brown Noise</span></article>
+                  <article class="sound-card is-locked"><img src="../public/sound_icons/abstract.svg" alt="" /><span>Soft Drone</span></article>
+                </div>
+              </section>
+            </div>
+
+            <aside class="rail">
+              <section class="panel composer-cta">
+                <div class="cta-mark">
+                  <img src="../public/sound_icons/mix.svg" alt="" />
+                </div>
+                <h3>Start Composing</h3>
+                <p>Tap sounds above to start playing. Select up to 6 sounds at once.</p>
+                <button class="primary-btn wide">Create mix</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" data-view="silence">
+          <div class="content-grid silence-layout">
+            <div class="main-column">
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">0/2 active frequencies</p>
+                    <h3>Silent Quantum Frequencies</h3>
+                  </div>
+                  <button class="chip-btn">Grid view</button>
+                </div>
+                <div class="info-card">
+                  <div class="mode-icon">
+                    <img src="../public/sound_icons/quantum.svg" alt="" />
+                  </div>
+                  <div>
+                    <h4>What are Silent Quantum Frequencies?</h4>
+                    <p>
+                      These frequencies stay in the background while your audible mix
+                      plays. On web, they fit better as a browsable catalog with
+                      richer descriptions and premium states.
+                    </p>
+                  </div>
+                </div>
+                <div class="frequency-list">
+                  <article class="frequency-card">
+                    <div class="art art-focus"></div>
+                    <div>
+                      <h4>Focus</h4>
+                      <p>Sharpen attention and maintain cognitive clarity.</p>
+                    </div>
+                  </article>
+                  <article class="frequency-card">
+                    <div class="art art-meditation"></div>
+                    <div>
+                      <h4>Meditation</h4>
+                      <p>Balance your energy for calm and deeper mindfulness.</p>
+                    </div>
+                  </article>
+                  <article class="frequency-card">
+                    <div class="art art-qi"></div>
+                    <div>
+                      <h4>Qi Energy</h4>
+                      <p>Support recovery and restore low-energy days.</p>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            </div>
+
+            <aside class="rail">
+              <section class="panel premium-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Premium catalog</p>
+                    <h3>Enhance Your Mix</h3>
+                  </div>
+                </div>
+                <div class="premium-list">
+                  <article class="premium-item"><span>Immune</span><small>Premium</small></article>
+                  <article class="premium-item"><span>Wealth</span><small>Premium</small></article>
+                  <article class="premium-item"><span>Vision</span><small>Premium</small></article>
+                  <article class="premium-item"><span>Third Eye</span><small>Premium</small></article>
+                </div>
+                <button class="primary-btn wide">Upgrade</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" data-view="stats">
+          <div class="content-grid stats-layout">
+            <div class="main-column">
+              <section class="stats-grid">
+                <article class="metric-card">
+                  <p class="eyebrow">Sessions this week</p>
+                  <h3>12</h3>
+                  <span>+3 vs last week</span>
+                </article>
+                <article class="metric-card">
+                  <p class="eyebrow">Average length</p>
+                  <h3>38m</h3>
+                  <span>Sleep mode leads</span>
+                </article>
+                <article class="metric-card">
+                  <p class="eyebrow">Streak</p>
+                  <h3>9 days</h3>
+                  <span>Best in 30 days</span>
+                </article>
+              </section>
+
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Listening pattern</p>
+                    <h3>Weekly Activity</h3>
+                  </div>
+                </div>
+                <div class="bars">
+                  <div><span>Mon</span><i style="height: 42%"></i></div>
+                  <div><span>Tue</span><i style="height: 68%"></i></div>
+                  <div><span>Wed</span><i style="height: 54%"></i></div>
+                  <div><span>Thu</span><i style="height: 82%"></i></div>
+                  <div><span>Fri</span><i style="height: 74%"></i></div>
+                  <div><span>Sat</span><i style="height: 58%"></i></div>
+                  <div><span>Sun</span><i style="height: 90%"></i></div>
+                </div>
+              </section>
+            </div>
+
+            <aside class="rail">
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Top mixes</p>
+                    <h3>Most Played</h3>
+                  </div>
+                </div>
+                <div class="premium-list">
+                  <article class="premium-item"><span>Deep Sleep</span><small>4h 20m</small></article>
+                  <article class="premium-item"><span>Rainy Night</span><small>3h 02m</small></article>
+                  <article class="premium-item"><span>Focus Flow</span><small>2h 43m</small></article>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" data-view="settings">
+          <div class="content-grid settings-layout">
+            <div class="main-column">
+              <section class="panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Account</p>
+                    <h3>Profile & Preferences</h3>
+                  </div>
+                </div>
+                <div class="settings-list">
+                  <article class="settings-row"><span>Email</span><strong>user@serene.app</strong></article>
+                  <article class="settings-row"><span>Plan</span><strong>Premium annual</strong></article>
+                  <article class="settings-row"><span>Playback quality</span><strong>High</strong></article>
+                  <article class="settings-row"><span>Sleep reminder</span><strong>Enabled</strong></article>
+                </div>
+              </section>
+            </div>
+
+            <aside class="rail">
+              <section class="panel composer-cta">
+                <div class="cta-mark">
+                  <img src="../public/sound_icons/star_solid.svg" alt="" />
+                </div>
+                <h3>Subscription</h3>
+                <p>Carry the premium card treatment from mobile into a simpler web billing panel.</p>
+                <button class="primary-btn wide">Manage plan</button>
+              </section>
+            </aside>
+          </div>
+        </section>
+      </main>
+
+      <!-- ── Right Now-Playing Rail ── -->
+      <aside class="now-playing-rail">
+        <div class="np-rail-header">
+          <h3>Now Playing</h3>
+          <button class="np-action-btn" title="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+          </button>
+        </div>
+
+        <div class="np-rail-tabs">
+          <button class="np-tab is-active" data-np-tab="queue">Queue</button>
+          <button class="np-tab" data-np-tab="related">Related</button>
+          <button class="np-tab" data-np-tab="info">Info</button>
+        </div>
+
+        <div class="np-art-block">
+          <div class="np-art-visual">
+            <div class="np-equalizer" aria-hidden="true" id="npEqualizer">
+              <span style="--bar: 54%"></span>
+              <span style="--bar: 82%"></span>
+              <span style="--bar: 38%"></span>
+              <span style="--bar: 68%"></span>
+              <span style="--bar: 92%"></span>
+              <span style="--bar: 45%"></span>
+              <span style="--bar: 78%"></span>
+              <span style="--bar: 55%"></span>
+              <span style="--bar: 88%"></span>
+              <span style="--bar: 62%"></span>
+              <span style="--bar: 74%"></span>
+              <span style="--bar: 48%"></span>
+              <span style="--bar: 95%"></span>
+              <span style="--bar: 36%"></span>
+              <span style="--bar: 70%"></span>
+              <span style="--bar: 58%"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="np-meta">
+          <h4 id="npTitle">Deep Sleep</h4>
+          <p id="npArtist">Sleep · Active Mix · 3 sounds</p>
+        </div>
+
+        <div class="np-actions">
+          <button class="np-action-btn" id="npLikeBtn" title="Like">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <button class="np-action-btn" title="Add to mix">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </button>
+          <button class="np-action-btn" title="Silent Frequency">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          </button>
+          <button class="np-action-btn" title="Share">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+          </button>
+          <button class="np-action-btn" title="More">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+          </button>
+        </div>
+
+        <div class="np-track-section">
+          <div class="np-section-label">
+            <span>Active Tracks</span>
+            <span id="npTrackCount">3 / 6</span>
+          </div>
+          <div id="npTrackList">
+            <div class="np-track-row is-active">
+              <div class="np-track-icon">
+                <img src="../public/sound_icons/ocean.svg" alt="" />
+              </div>
+              <div class="np-track-info">
+                <div class="n">Ocean</div>
+                <div class="c">Water</div>
+              </div>
+              <div class="np-active-dot"></div>
+              <div class="np-vol-wrap">
+                <input type="range" min="0" max="100" value="70" />
+              </div>
+            </div>
+            <div class="np-track-row">
+              <div class="np-track-icon">
+                <img src="../public/sound_icons/rain.svg" alt="" />
+              </div>
+              <div class="np-track-info">
+                <div class="n">Rain</div>
+                <div class="c">Water</div>
+              </div>
+              <div class="np-vol-wrap">
+                <input type="range" min="0" max="100" value="55" />
+              </div>
+            </div>
+            <div class="np-track-row">
+              <div class="np-track-icon">
+                <img src="../public/sound_icons/abstract.svg" alt="" />
+              </div>
+              <div class="np-track-info">
+                <div class="n">Soft Drone</div>
+                <div class="c">Ambient</div>
+              </div>
+              <div class="np-vol-wrap">
+                <input type="range" min="0" max="100" value="40" />
+              </div>
+            </div>
+          </div>
+
+          <div class="np-section-label" style="margin-top: 10px;">
+            <span>Silent Frequencies</span>
+            <span>2 / 2</span>
+          </div>
+          <div class="np-track-row">
+            <div class="np-track-icon gradient-focus">
+              <img src="../public/sound_icons/quantum.svg" alt="" />
+            </div>
+            <div class="np-track-info">
+              <div class="n">Focus</div>
+              <div class="c">Silent Quantum</div>
+            </div>
+          </div>
+          <div class="np-track-row">
+            <div class="np-track-icon gradient-calm">
+              <img src="../public/sound_icons/meditate.svg" alt="" />
+            </div>
+            <div class="np-track-info">
+              <div class="n">Meditation</div>
+              <div class="c">Silent Quantum</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="np-timer-block">
+          <div class="section-head compact">
+            <h4 style="font-size:0.85rem">Sleep Timer</h4>
+            <span id="npTimerLabel">45 min</span>
+          </div>
+          <div class="timer-options">
+            <button onclick="setTimer(15,this)">15m</button>
+            <button onclick="setTimer(30,this)">30m</button>
+            <button class="is-active" onclick="setTimer(45,this)">45m</button>
+            <button onclick="setTimer(60,this)">60m</button>
+          </div>
+        </div>
+
+        <button class="primary-btn np-pause-btn" id="npPauseBtn" onclick="togglePlay()">Pause</button>
+      </aside>
+
+      <!-- ── Bottom Player Bar ── -->
+      <footer class="bottom-player">
+        <div class="bottom-player-left">
+          <div class="bp-art">
+            <img src="../public/sound_icons/moon.svg" alt="" />
+          </div>
+          <div class="bp-info">
+            <p class="bp-name" id="bpName">Deep Sleep</p>
+            <p class="bp-artist" id="bpArtist">Sleep · 3 sounds active</p>
+          </div>
+          <div class="eq-mini" id="eqMini">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="bottom-player-center">
+          <div class="bp-controls">
+            <button class="bp-ctrl" title="Shuffle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+            </button>
+            <button class="bp-ctrl" title="Previous">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="bp-play" id="bpPlayBtn" onclick="togglePlay()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" id="bpPlayIcon"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="bp-ctrl" title="Next">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+            <button class="bp-ctrl" title="Repeat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+            </button>
+          </div>
+          <div class="bp-progress">
+            <span id="bpTime">0:00</span>
+            <div class="bp-bar" id="bpBar" onclick="seekBar(event)">
+              <div class="bp-bar-fill" id="bpFill"></div>
+            </div>
+            <span>∞</span>
+          </div>
+        </div>
+
+        <div class="bottom-player-right">
+          <button class="bp-ctrl" title="Queue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
+          </button>
+          <div class="bp-vol">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--muted-soft)"><path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5zm7-.17v6.34L9.83 13H7v-2h2.83L12 8.83z"/></svg>
+            <div class="bp-vol-bar"><div class="bp-vol-fill"></div></div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
