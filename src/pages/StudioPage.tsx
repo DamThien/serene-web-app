@@ -4,6 +4,7 @@ import { FrequenciesPanel } from '../components/FrequenciesPanel';
 import { SoundLibraryPanel } from '../components/SoundLibraryPanel';
 import { TrackControl } from '../components/TrackControl';
 import { useMixerStore } from '../store/mixerStore';
+import { getFallbackMixCoverUrl, getMixCoverUrl } from '../utils/mixCovers';
 
 export const StudioPage: React.FC = () => {
   const tracks = useMixerStore((state) => state.tracks);
@@ -22,6 +23,13 @@ export const StudioPage: React.FC = () => {
   const [FrequenciesOpen, setFrequenciesOpen] = useState(false);
 
   const highlightPlan = subscriptionPlans.find((plan) => plan.isPopular) ?? subscriptionPlans[0];
+  const studioMixCoverSource = {
+    name: mixName || 'Untitled Mix',
+    description: mixDesc,
+    icon: tracks[0]?.icon,
+    tags: tracks.map((track) => track.cat.toLowerCase()),
+  };
+  const studioCoverUrl = getMixCoverUrl(studioMixCoverSource);
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -33,8 +41,24 @@ export const StudioPage: React.FC = () => {
         <div className="flex flex-col flex-1 overflow-hidden">
           <div className="px-4 pb-4 pt-4 sm:px-6 sm:pt-5 flex-shrink-0">
             <div className="soft-panel rounded-[30px] overflow-hidden">
-              <div className="px-5 py-5 sm:px-6 sm:py-6 border-b border-[var(--line)] bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,0.16),transparent_32%),radial-gradient(circle_at_top_right,rgba(221,45,255,0.14),transparent_26%)]">
-                <div className="flex items-center gap-3 mb-4">
+              <div className="relative overflow-hidden px-5 py-5 sm:px-6 sm:py-6 border-b border-[var(--line)]">
+                <img
+                  src={studioCoverUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-70"
+                  loading="lazy"
+                  onError={(event) => {
+                    const fallbackUrl = getFallbackMixCoverUrl(studioMixCoverSource);
+
+                    if (event.currentTarget.src !== fallbackUrl) {
+                      event.currentTarget.src = fallbackUrl;
+                    }
+                  }}
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--gradient-phase-1)_0%,var(--gradient-phase-2)_44%,var(--gradient-phase-3)_100%)]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-[var(--gradient-phase-3)] to-[var(--surface-panel)]" />
+
+                <div className="relative flex items-center gap-3 mb-4">
                   <button
                     className="sidebar-toggle"
                     onClick={() => setFrequenciesOpen((prev) => !prev)}
@@ -80,14 +104,16 @@ export const StudioPage: React.FC = () => {
                   </div>
                 </div>
 
-                <input
-                  type="text"
-                  value={mixDesc}
-                  onChange={(event) => setMixDesc(event.target.value)}
-                  placeholder="Short description..."
-                  maxLength={140}
-                  className="w-full bg-transparent border-none outline-none text-sm text-[var(--muted)] placeholder:text-[var(--dim)]"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={mixDesc}
+                    onChange={(event) => setMixDesc(event.target.value)}
+                    placeholder="Short description..."
+                    maxLength={140}
+                    className="w-full bg-transparent border-none outline-none text-sm text-[var(--muted)] placeholder:text-[var(--dim)]"
+                  />
+                </div>
               </div>
 
               <div className="px-5 py-4 sm:px-6 bg-[var(--surface)]">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Play, Pause } from 'lucide-react';
 import type { Mix } from '../../types';
+import { getFallbackMixCoverUrl, getMixCoverUrl } from '../../utils/mixCovers';
 
 interface MixCardProps {
   mix: Mix;
@@ -14,6 +15,7 @@ export const MixCard: React.FC<MixCardProps> = ({ mix, playing, onPlay, onOpenSt
   const tags = mix.tags?.slice(0, 4) ?? [];
   const plays = mix.plays ?? 0;
   const detail = mix.description?.trim() || 'A layered ambience mix for slower, calmer listening sessions.';
+  const coverUrl = getMixCoverUrl(mix);
 
   return (
     <div
@@ -21,7 +23,23 @@ export const MixCard: React.FC<MixCardProps> = ({ mix, playing, onPlay, onOpenSt
       style={style}
       onClick={onPlay}
     >
-      <div className="absolute inset-x-0 top-0 h-[120px] opacity-80 bg-[radial-gradient(circle_at_top_left,rgba(163,93,255,0.24),transparent_48%),radial-gradient(circle_at_top_right,rgba(221,45,255,0.2),transparent_38%)]" />
+      <div className="absolute inset-x-0 top-0 h-[120px] overflow-hidden">
+        <img
+          src={coverUrl}
+          alt=""
+          className="h-full w-full object-cover opacity-75 transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          onError={(event) => {
+            const fallbackUrl = getFallbackMixCoverUrl(mix);
+
+            if (event.currentTarget.src !== fallbackUrl) {
+              event.currentTarget.src = fallbackUrl;
+            }
+          }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--gradient-phase-1)_0%,var(--gradient-phase-2)_44%,var(--gradient-phase-3)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--gradient-phase-3)] to-[var(--surface-panel)]" />
+      </div>
 
       <div className="relative">
         <div className="flex items-start gap-4 mb-5">

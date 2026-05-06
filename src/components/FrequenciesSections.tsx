@@ -22,7 +22,7 @@ export const SilentFrequencySection: React.FC<{
           {silentFrequencies.slice(0, maxItems).map((item) => {
             const active = selectedIds.some((id) => id === item.id);
             return (
-              <button key={item.id} onClick={() => onToggle(item)} className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--purple)] bg-[var(--purple3)] text-[var(--purple)] shadow-[0_12px_24px_rgba(163,93,255,0.12)]' : 'border-[var(--line)] bg-[var(--surface-strong)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}>
+              <button key={item.id} onClick={() => onToggle(item)} className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--purple)] bg-[var(--purple3)] text-[var(--purple)] shadow-[0_12px_24px_rgba(163,93,255,0.12)]' : 'border-[var(--line)] bg-[var(--surface-strong)] text-[var(--bright)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}>
                 <div className="flex items-start gap-3">
                   {item.thumbnail && (
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden">
@@ -66,7 +66,7 @@ export const FrequencyLayerSection: React.FC<{
           {frequencyLayers.slice(0, maxItems).map((item) => {
             const active = selected?.id === item.id;
             return (
-              <button key={item.id} onClick={() => onToggle(item)} className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--pink)] bg-[rgba(221,45,255,0.12)] text-[var(--pink)] shadow-[0_12px_24px_rgba(221,45,255,0.10)]' : 'border-[var(--line)] bg-[var(--surface-strong)] text-[var(--mid)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}>
+              <button key={item.id} onClick={() => onToggle(item)} className={`rounded-[18px] border text-left px-3 py-3 transition-all ${active ? 'border-[var(--pink)] bg-[rgba(221,45,255,0.12)] text-[var(--pink)] shadow-[0_12px_24px_rgba(221,45,255,0.10)]' : 'border-[var(--line)] bg-[var(--surface-strong)] text-[var(--bright)] hover:border-[var(--line2)] hover:text-[var(--soft)] hover:bg-[var(--surface-elevated)]'}`}>
                 <div className="text-sm font-medium">{item.hz} Hz</div>
                 <div className="text-[11px] opacity-80 leading-relaxed mt-1 line-clamp-2">{item.title}</div>
               </button>

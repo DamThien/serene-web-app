@@ -4,88 +4,96 @@
 :root,
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --ink: #0d0618;
-  --ink2: #1a0d33;
-  --ink3: #241348;
-  --ink4: #2e1a5c;
-  --surface: rgba(46, 25, 78, 0.8);
-  --surface-strong: rgba(35, 24, 63, 0.94);
-  --surface-elevated: rgba(54, 32, 89, 0.84);
-  --page-bg: #0d0618;
-  --page-bg-alt: #1a0d33;
+  --ink:               #0d2224;
+  --ink2:              #163032;
+  --ink3:              #1c3a3c;
+  --ink4:              #224446;
+  --surface:           rgba(28, 58, 60, 0.8);
+  --surface-strong:    rgba(22, 48, 50, 0.94);
+  --surface-elevated:  rgba(34, 68, 70, 0.84);
+  --page-bg:           #0d2224;
+  --page-bg-alt:       #163032;
   --page-gradient:
-    radial-gradient(circle at 15% 20%, rgba(163, 93, 255, 0.2), transparent 28%),
-    radial-gradient(circle at 85% 15%, rgba(221, 45, 255, 0.18), transparent 24%),
-    linear-gradient(180deg, #0d0618 0%, #1a0d33 50%, #241348 100%);
-  --line: rgba(243, 235, 255, 0.08);
-  --line2: rgba(243, 235, 255, 0.16);
-  --dim: #6b5a8f;
-  --mid: #9b8bc7;
-  --muted: #b39bcf;
-  --soft: #c9b8e0;
-  --bright: #f3ebff;
-  --purple: #a35dff;
-  --purple2: #8b45e0;
-  --purple3: rgba(163, 93, 255, 0.14);
-  --pink: #dd2dff;
-  --blush: #e85a9e;
-  --indigo: #6b5ce6;
-  --sage: var(--purple);
-  --sage2: var(--purple2);
-  --sage3: var(--purple3);
-  --gold: var(--pink);
-  --hero-title: #f3ebff;
-  --hero-copy: #c9b8e0;
-  --icon-shell: linear-gradient(145deg, rgba(163, 93, 255, 0.95), rgba(139, 69, 224, 0.95));
-  --card-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
-  --account-card-bg: linear-gradient(135deg,rgba(35,24,63,.96),rgba(13,6,24,.98));
-  --signin-card-bg: linear-gradient(135deg,rgba(26,15,46,.96),rgba(10,6,22,.98));
-  --avatar-border: rgba(243, 235, 255, 0.12);
-  --membership-border: rgba(163, 93, 255, 0.3);
-  --membership-bg: rgba(163, 93, 255, 0.1);
+    radial-gradient(circle at 15% 20%, rgba(26,154,160,0.2), transparent 28%),
+    radial-gradient(circle at 85% 15%, rgba(93,200,154,0.15), transparent 24%),
+    linear-gradient(180deg, #0d2224 0%, #163032 50%, #1c3a3c 100%);
+  --line:              rgba(126, 207, 224, 0.08);
+  --line2:             rgba(126, 207, 224, 0.16);
+  --dim:               #2a6e74;
+  --mid:               #4a9aa0;
+  --muted:             #6bb8bf;
+  --soft:              #9ed4da;
+  --bright:            #d4f0f3;
+  --purple:            #1a9aa0;
+  --purple2:           #0e7a6e;
+  --purple3:           rgba(26, 154, 160, 0.14);
+  --pink:              #5dc89a;
+  --blush:             #7ecfe0;
+  --indigo:            #1a9aa0;
+  --sage:              var(--purple);
+  --sage2:             var(--purple2);
+  --sage3:             var(--purple3);
+  --gold:              var(--pink);
+  --hero-title:        #d4f0f3;
+  --hero-copy:         #9ed4da;
+  --icon-shell:        linear-gradient(145deg, rgba(26,154,160,0.95), rgba(14,122,110,0.95));
+  --card-shadow:       0 18px 48px rgba(0, 0, 0, 0.28);
+  --account-card-bg:   linear-gradient(135deg, rgba(22,48,50,.96), rgba(13,34,36,.98));
+  --signin-card-bg:    linear-gradient(135deg, rgba(16,42,44,.96), rgba(8,24,26,.98));
+  --avatar-border:     rgba(126, 207, 224, 0.12);
+  --membership-border: rgba(26, 154, 160, 0.3);
+  --membership-bg:     rgba(26, 154, 160, 0.1);
+  --gold: rgba(247, 255, 3, 0.9);
+    --gradient-phase-1: rgba(0, 0, 0, 0.82);
+    --gradient-phase-2: rgba(0, 0, 0, 0.58);
+    --gradient-phase-3: rgba(0, 0, 0, 0.18);
 }
-
+ 
 :root[data-theme='light'] {
   color-scheme: light;
-  --ink: #f8f6fc;
-  --ink2: #fefcff;
-  --ink3: #ffffff;
-  --ink4: #ede7f5;
-  --surface: rgba(255, 253, 255, 0.82);
-  --surface-strong: rgba(255, 253, 255, 0.96);
-  --surface-elevated: rgba(247, 243, 253, 0.95);
-  --page-bg: #f8f6fc;
-  --page-bg-alt: #fefcff;
+  --ink:               #b0d8d5;
+  --ink2:              #c2e2e0;
+  --ink3:              #d8eeec;
+  --ink4:              #a4ceca;
+  --surface:           rgba(216, 238, 236, 0.82);
+  --surface-strong:    rgba(216, 238, 236, 0.96);
+  --surface-elevated:  rgba(194, 226, 224, 0.95);
+  --page-bg:           #b0d8d5;
+  --page-bg-alt:       #c2e2e0;
   --page-gradient:
-    radial-gradient(circle at 14% 18%, rgba(163, 93, 255, 0.15), transparent 28%),
-    radial-gradient(circle at 82% 12%, rgba(221, 45, 255, 0.1), transparent 24%),
-    linear-gradient(180deg, #f0e6fa 0%, #f8f4fc 48%, #f0e8f8 100%);
-  --line: rgba(80, 60, 120, 0.09);
-  --line2: rgba(80, 60, 120, 0.17);
-  --dim: #a89bb5;
-  --mid: #7a6a95;
-  --muted: #5a4a70;
-  --soft: #3a2a50;
-  --bright: #1a0d33;
-  --purple: #a35dff;
-  --purple2: #8b45e0;
-  --purple3: rgba(163, 93, 255, 0.12);
-  --pink: #dd2dff;
-  --blush: #e85a9e;
-  --indigo: #6b5ce6;
-  --sage: var(--purple);
-  --sage2: var(--purple2);
-  --sage3: var(--purple3);
-  --gold: var(--pink);
-  --hero-title: #1a0d33;
-  --hero-copy: #5a4a70;
-  --icon-shell: linear-gradient(145deg, rgba(163, 93, 255, 0.9), rgba(139, 69, 224, 0.9));
-  --card-shadow: 0 18px 44px rgba(80, 60, 120, 0.08);
-  --account-card-bg: linear-gradient(135deg,rgba(255,255,255,.95),rgba(250,248,255,.98));
-  --signin-card-bg: linear-gradient(135deg,rgba(255,255,255,.94),rgba(248,245,253,.97));
-  --avatar-border: rgba(80, 60, 120, 0.15);
-  --membership-border: rgba(163, 93, 255, 0.35);
-  --membership-bg: rgba(163, 93, 255, 0.12);
+    radial-gradient(circle at 14% 18%, rgba(26,154,160,0.2), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(93,200,154,0.14), transparent 24%),
+    linear-gradient(180deg, #a8d4d0 0%, #b0d8d5 48%, #aad2ce 100%);
+  --line:              rgba(14, 122, 110, 0.1);
+  --line2:             rgba(14, 122, 110, 0.2);
+  --dim:               #7ab8be;
+  --mid:               #2e8e94;
+  --muted:             #136a70;
+  --soft:              #0a4a50;
+  --bright:            #052028;
+  --purple:            #1a9aa0;
+  --purple2:           #0e7a6e;
+  --purple3:           rgba(26, 154, 160, 0.12);
+  --pink:              #5dc89a;
+  --blush:             #7ecfe0;
+  --indigo:            #1a9aa0;
+  --sage:              var(--purple);
+  --sage2:             var(--purple2);
+  --sage3:             var(--purple3);
+  --gold:              var(--pink);
+  --hero-title:        #052028;
+  --hero-copy:         #136a70;
+  --icon-shell:        linear-gradient(145deg, rgba(26,154,160,0.9), rgba(14,122,110,0.9));
+  --card-shadow:       0 18px 44px rgba(10, 80, 80, 0.12);
+  --account-card-bg:   linear-gradient(135deg, rgba(194,226,224,.95), #b0d8d5);
+  --signin-card-bg:    linear-gradient(135deg, rgba(176,216,213,.94), rgba(160,206,202,.97));
+  --avatar-border:     rgba(14, 122, 110, 0.18);
+  --membership-border: rgba(26, 154, 160, 0.35);
+  --membership-bg:     rgba(26, 154, 160, 0.12);
+  --gold: rgba(247, 255, 3, 0.9);
+  --gradient-phase-1: rgba(255, 255, 255, 0.82);
+  --gradient-phase-2: rgba(255, 255, 255, 0.58);
+  --gradient-phase-3: rgba(255, 255, 255, 0.18);
 }
 
 @theme {
@@ -100,7 +108,7 @@
   --color-bright: var(--bright);
   --color-sage: var(--purple);
   --color-sage2: var(--purple2);
-  --color-gold: var(--pink);
+  --color-gold: var(--gold);
   --color-blush: var(--blush);
   --color-indigo: var(--indigo);
   --font-sans: 'Geist', system-ui, sans-serif;
